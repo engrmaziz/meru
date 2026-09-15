@@ -10,6 +10,7 @@ import { createHash, randomUUID } from 'crypto';
 import { parseBearerUserId } from './auth.util';
 import { ArenaService } from './arena.service';
 import { AuthService } from './auth.service';
+import { LaunchService } from './launch.service';
 import { ProgressionService } from './progression.service';
 import type { TripUpsertBody } from './trips.types';
 
@@ -29,6 +30,7 @@ export class TripsService {
     private readonly progression: ProgressionService,
     private readonly arena: ArenaService,
     private readonly auth: AuthService,
+    private readonly launch: LaunchService,
   ) {}
 
   upsert(userId: string, body: TripUpsertBody) {
@@ -49,11 +51,14 @@ export class TripsService {
     }
 
     const pointCount = body.pointCount ?? body.locations?.length ?? 0;
-    let integrity = 88;
-    if (pointCount < 5) integrity -= 12;
-    if ((body.distanceM ?? 0) < 100) integrity -= 8;
+    // Phase 10: slightly stricter integrity against sparse/spoofed traces
+    let integrity = 90;
+    if (pointCount < 8) integrity -= 15;
+    if (pointCount < 5) integrity -= 10;
+    if ((body.distanceM ?? 0) < 150) integrity -= 10;
     if ((body.events ?? []).filter((e) => e.type === 'BRAKING').length > 8) integrity -= 5;
-    integrity = Math.max(55, Math.min(99, integrity));
+    if ((body.maxSpeedKmh ?? 0) > 220) integrity -= 20; // spoof / crash outlier
+    integrity = Math.max(40, Math.min(99, integrity));
 
     const stored: StoredTrip = {
       ...body,
@@ -79,6 +84,7 @@ export class TripsService {
       awards.competitiveEligible,
       routeHash,
     );
+    this.launch.bump('tripsUpserted');
 
     return {
       id: stored.id,

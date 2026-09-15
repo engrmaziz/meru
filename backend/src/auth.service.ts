@@ -63,6 +63,20 @@ export class AuthService {
     return null;
   }
 
+  findByEmail(email: string): UserRecord | null {
+    return this.users.get(email) ?? null;
+  }
+
+  deleteUser(userId: string) {
+    for (const [email, u] of this.users) {
+      if (u.id === userId) {
+        this.users.delete(email);
+        return true;
+      }
+    }
+    return false;
+  }
+
   private tokenResponse(user: UserRecord) {
     return {
       accessToken: `meru_${user.id}_${randomUUID()}`,

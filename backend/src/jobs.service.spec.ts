@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { JobsService } from './jobs.controller';
+import { LaunchService } from './launch.service';
 import { VaultService } from './vault.controller';
 import { WorkshopsService } from './workshops.controller';
 
@@ -11,7 +12,7 @@ describe('JobsService writeback', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [VaultService, WorkshopsService, JobsService],
+      providers: [LaunchService, VaultService, WorkshopsService, JobsService],
     }).compile();
     jobs = module.get(JobsService);
     vault = module.get(VaultService);
@@ -71,10 +72,10 @@ describe('JobsService writeback', () => {
 
   it('share expiry denies staff shared history', () => {
     const { job } = bookAndBill();
-    // Force share expired via vault shares map
     const token = job.historyShareToken!;
-    const shares = (vault as unknown as { shares: Map<string, { expiresAtMs: number }> })
-      .shares;
+    const shares = (
+      vault as unknown as { shares: Map<string, { expiresAtMs: number }> }
+    ).shares;
     const share = shares.get(token)!;
     share.expiresAtMs = Date.now() - 1;
 

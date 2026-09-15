@@ -13,6 +13,13 @@
 
 ---
 
+## DEC-026 — Soft launch Lahore (Summit)
+- **Date:** 2026-09-15
+- **Status:** Accepted
+- **Decision:** Soft launch city = Lahore (`pk-pb-lhr`). Central `LaunchService` owns S2/S3/S4 feature flags, integrity competitive min, booking kill switch, admin key (`MERU_ADMIN_KEY`), in-memory metrics, auth/booking rate limits, and account deletion. Security regression e2e replaces live Strix until a staging URL exists (checklist in BUILD-LOG). Beta targets: ≥99% crash-free sessions, ≥95% trip sync success. Stay on single cheap box + free tiers.
+- **Why:** Controlled city launch without burning budget or trust (plan/10).
+- **Consequences:** Rotate admin key for prod; attach Crashlytics before claiming crash-free; run Strix when staging is public.
+
 ## DEC-025 — Phase 9 Stamp writeback + staff web MVP
 - **Date:** 2026-09-15
 - **Status:** Accepted

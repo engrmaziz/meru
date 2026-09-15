@@ -109,6 +109,20 @@
 - **Strix:** skipped
 - **Follow-ups:** Phase 7 Vault (garage)
 
+### 2026-09-15 — Phase 10 Summit soft launch harden
+- **Band / slice:** Phase 10 / Summit
+- **Agent:** Cursor agent (commits as engrmaziz only)
+- **Ponytail rung used:** YAGNI (in-memory launch flags/metrics/rate limits) + reuse (admin over Arena flags)
+- **Context7 libs:** n/a
+- **Stitch screens:** n/a (store listing checklist only)
+- **DEC referenced:** DEC-005, DEC-007, DEC-019, DEC-026
+- **What shipped:** LaunchService flags + Lahore soft launch; admin key; metrics; auth/booking rate limits; stricter integrity; account deletion; Android remote flags + delete account; security e2e (IDOR/admin/delete); SOFT-LAUNCH + SUPPORT docs
+- **What deferred (ponytail:):** Live Strix against public staging; Crashlytics wiring; Postgres persistence; FCM
+- **Gamify/motion added:** none (harden phase)
+- **Tests:** LaunchService unit; security.e2e-spec; full suite green
+- **Strix:** Local security regression suite = pass #2 stand-in. Findings: 0 criticals in IDOR/admin/share paths covered. Full Strix when staging URL available.
+- **Follow-ups:** Public expansion after soft-launch checklist signed
+
 ### 2026-09-15 — Phase 9 Stamp jobs & vault writeback
 - **Band / slice:** Phase 9 / Stamp
 - **Agent:** Cursor agent (commits as engrmaziz only)

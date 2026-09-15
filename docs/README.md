@@ -15,6 +15,8 @@ Read in this order:
 9. **[ANNEX-D-QA.md](./ANNEX-D-QA.md)** — test protocols (+ Strix security subset)  
 10. **[ANNEX-E-DESIGN-TOOLING.md](./ANNEX-E-DESIGN-TOOLING.md)** — Stitch MCP / anti-slop / gamify  
 11. **[BUILD-LOG.md](./BUILD-LOG.md)** — append every build slice  
+12. **[SOFT-LAUNCH.md](./SOFT-LAUNCH.md)** — Lahore soft-launch checklist (Phase 10)  
+13. **[SUPPORT.md](./SUPPORT.md)** — support + admin playbook  
 
 Also: repo root `AGENTS.md`, `.cursor/rules/`, `.cursor/skills/`.
 

@@ -18,6 +18,7 @@ import { randomUUID } from 'crypto';
 import { parseBearerUserId } from './auth.util';
 import { SERVICE_TAXONOMY, VaultService } from './vault.controller';
 import { JobsService } from './jobs.controller';
+import { LaunchService } from './launch.service';
 
 export type WorkshopKind = 'specialist' | 'multi' | 'general';
 
@@ -92,6 +93,7 @@ export class WorkshopsService {
     private readonly vault: VaultService,
     @Inject(forwardRef(() => JobsService))
     private readonly jobs: JobsService,
+    private readonly launch: LaunchService,
   ) {
     this.seedLahore();
   }
@@ -202,6 +204,12 @@ export class WorkshopsService {
       vehicleMake?: string;
     },
   ) {
+    const flags = this.launch.getFlags();
+    if (!flags.s4Marketplace || !flags.bookingsEnabled) {
+      throw new BadRequestException('Bookings paused for soft launch');
+    }
+    this.launch.consumeRate(`book:${userId}`, 20, 60_000);
+
     this.expireHolds();
     const workshop = this.workshops.get(body.workshopId);
     if (!workshop) throw new NotFoundException('Workshop not found');
@@ -256,6 +264,7 @@ export class WorkshopsService {
     };
     this.bookings.set(booking.id, booking);
     this.jobs.createFromBooking(booking);
+    this.launch.bump('bookingsCreated');
 
     this.pushNotif(userId, {
       type: 'booking_confirmed',

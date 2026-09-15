@@ -1,9 +1,12 @@
 import { Controller, Get } from '@nestjs/common';
+import { LaunchService } from './launch.service';
 
 @Controller()
 export class HealthController {
+  constructor(private readonly launch: LaunchService) {}
+
   @Get('health')
   health() {
-    return { status: 'ok', service: 'meru-api', phase: 1 };
+    return this.launch.healthPayload();
   }
 }

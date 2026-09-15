@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { LaunchService } from './launch.service';
 import { ProgressionService } from './progression.service';
 
 export type GeoType = 'city' | 'province' | 'country' | 'global';
@@ -65,14 +66,11 @@ export class ArenaService {
 
   private readonly users = new Map<string, ArenaUser>();
   private readonly boards = new Map<BoardKey, BoardEntry[]>();
-  private readonly flags = {
-    s2Leaderboards: true,
-    ghostDriver: true,
-    challengesEnabled: true,
-    weightsVersion: 1,
-  };
 
-  constructor(private readonly progression: ProgressionService) {
+  constructor(
+    private readonly progression: ProgressionService,
+    private readonly launch: LaunchService,
+  ) {
     this.seedBots();
   }
 
@@ -81,12 +79,11 @@ export class ArenaService {
   }
 
   getFlags() {
-    return { ...this.flags };
+    return this.launch.getFlags();
   }
 
-  patchFlags(partial: Partial<typeof this.flags>) {
-    Object.assign(this.flags, partial);
-    return this.getFlags();
+  patchFlags(partial: Parameters<LaunchService['patchFlags']>[0]) {
+    return this.launch.patchFlags(partial);
   }
 
   ensureUser(userId: string, displayName: string, homeCityId = 'pk-pb-lhr') {
@@ -173,7 +170,7 @@ export class ArenaService {
     geoId: string,
     period: string = 'season',
   ) {
-    if (!this.flags.s2Leaderboards) {
+    if (!this.launch.getFlags().s2Leaderboards) {
       return { disabled: true, entries: [], you: null, seasonId: this.season.id };
     }
     const key = this.key(this.season.id, geoType, geoId, period);
@@ -279,7 +276,7 @@ export class ArenaService {
   }
 
   ghostCompare(userId: string, routeHash: string | null, quality: number) {
-    if (!this.flags.ghostDriver) {
+    if (!this.launch.getFlags().ghostDriver) {
       return { enabled: false };
     }
     const u = this.ensureUser(userId, 'Driver');

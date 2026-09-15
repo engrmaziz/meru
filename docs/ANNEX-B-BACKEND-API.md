@@ -134,7 +134,16 @@ Creates `service_records` source=`mechanic_issued_bill`, lines/parts, links `inv
 
 ---
 
-## B.8 Admin
+## B.8 Admin & launch (Phase 10)
+| Method | Path | Notes |
+|--------|------|-------|
+| GET | `/flags` | public soft-launch flags |
+| GET/PATCH | `/admin/flags` | `X-Admin-Key` required |
+| GET | `/admin/metrics` | counters + beta targets |
+| POST | `/admin/support/lookup` | email/userId lookup |
+| DELETE | `/account` | purge vault + auth user |
+
+## B.8b Admin (legacy)
 - Feature flags, weights, seasons, challenges, achievements, geo, workshop verify, disputes, user ban, integrity review.
 
 All admin routes: role=admin + audit log.

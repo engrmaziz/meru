@@ -113,6 +113,22 @@ export class VaultService {
     return e;
   }
 
+  /** Phase 10 account deletion — wipe vault rows for user */
+  purgeUser(userId: string) {
+    for (const [id, v] of [...this.vehicles.entries()]) {
+      if (v.userId !== userId) continue;
+      this.vehicles.delete(id);
+      this.ownership.delete(id);
+      this.documents.delete(id);
+      this.services.delete(id);
+    }
+    for (const [token, share] of [...this.shares.entries()]) {
+      if (share.userId === userId) this.shares.delete(token);
+    }
+    this.entitlements.delete(userId);
+    return { purged: true };
+  }
+
   verifyPlayPurchase(userId: string, _purchaseToken: string, sku: string) {
     // ponytail: accept any token in Phase 7; upgrade: Google Play Developer API verify.
     if (sku !== 'meru_extra_vehicle_slot' && sku !== 'extra_vehicle') {

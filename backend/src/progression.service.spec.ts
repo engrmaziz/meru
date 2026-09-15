@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ArenaService } from './arena.service';
 import { AuthService } from './auth.service';
+import { LaunchService } from './launch.service';
 import { ProgressionService } from './progression.service';
 import { TripsService } from './trips.controller';
 
@@ -10,7 +11,7 @@ describe('ProgressionService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ProgressionService, ArenaService, AuthService, TripsService],
+      providers: [LaunchService, ProgressionService, ArenaService, AuthService, TripsService],
     }).compile();
     progression = module.get(ProgressionService);
     trips = module.get(TripsService);

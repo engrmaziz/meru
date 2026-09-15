@@ -21,7 +21,7 @@ Android-first driving adventure — telemetry, ascent ranks, vehicle vault, work
 | 7 | Vault | Done — garage, timeline, entitlement, offline services |
 | 8 | Bay | Done — workshop discovery, holds, bookings + history share |
 | 9 | Stamp | Done — jobs, invoices, certified vault writeback, staff web |
-| 10 | Summit | Planned — see `plan/10.md` |
+| 10 | Summit | Done — soft-launch Lahore harden, flags, security e2e |
 
 ---
 
@@ -93,6 +93,12 @@ Android-first driving adventure — telemetry, ascent ranks, vehicle vault, work
 - Extra-work approve/deny; invoice issue (PDF stub) → owner confirm → certified vault writeback
 - Dispute blocks writeback; reviews only on closed jobs
 - Android Stamp screens + CERTIFIED timeline stamp; `workshop-web` Next.js staff MVP
+
+## Phase 10 — Summit
+
+- Launch flags (S2/S3/S4) + Lahore soft launch; admin key; metrics; rate limits
+- Stricter trip integrity; account deletion; Android remote flags
+- Security e2e (IDOR / admin / delete); `docs/SOFT-LAUNCH.md` + `docs/SUPPORT.md`
 
 ---
 

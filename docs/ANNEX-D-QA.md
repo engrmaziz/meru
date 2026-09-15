@@ -84,3 +84,20 @@ Log Strix runs in `BUILD-LOG.md`. Never replace car tests with pentests.
 
 ## D.7 Accessibility
 - Speed readable at arm length; TalkBack labels; color not sole severity signal; reduce motion option later.
+
+---
+
+## D.8 Soft-launch / Summit
+- Checklist: [`SOFT-LAUNCH.md`](./SOFT-LAUNCH.md)
+- Support: [`SUPPORT.md`](./SUPPORT.md)
+- Security regressions: `backend/test/security.e2e-spec.ts` (run with `npm run test:e2e`)
+- Beta targets: crash-free ≥99%, trip sync ≥95% (DEC-026)
+
+## D.9 Play Data Safety (summary)
+| Data | Collected | Purpose | Deletion |
+|------|-----------|---------|----------|
+| Location (while driving) | Yes | Telemetry / maps | Account delete + OS revoke |
+| Motion sensors | Yes | Drive quality | Account delete |
+| Account email | Yes | Auth | `DELETE /v1/account` |
+| Vehicle vault | Yes | Garage history | Account delete purges vault |
+| Approximate ranks | Yes if opted in | Leaderboards | Privacy opt-out / delete |

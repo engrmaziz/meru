@@ -123,15 +123,4 @@ export class ArenaController {
       body.displayName || this.auth.findDisplayName(userId) || 'Driver';
     return this.arena.setPrivacy(userId, body.boardOptIn !== false, name);
   }
-
-  @Get('admin/flags')
-  adminFlags() {
-    // ponytail: unauthenticated admin for local Phase 6; upgrade: role guard.
-    return this.arena.getFlags();
-  }
-
-  @Patch('admin/flags')
-  adminPatch(@Body() body: Record<string, unknown>) {
-    return this.arena.patchFlags(body as never);
-  }
 }

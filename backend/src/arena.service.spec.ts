@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ArenaService } from './arena.service';
 import { AuthService } from './auth.service';
+import { LaunchService } from './launch.service';
 import { ProgressionService } from './progression.service';
 import { TripsService } from './trips.controller';
 
@@ -11,7 +12,7 @@ describe('ArenaService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ProgressionService, ArenaService, AuthService, TripsService],
+      providers: [LaunchService, ProgressionService, ArenaService, AuthService, TripsService],
     }).compile();
     arena = module.get(ArenaService);
     trips = module.get(TripsService);
@@ -48,11 +49,10 @@ describe('ArenaService', () => {
     expect(ranks.ranks.every((r) => r.rank != null && r.rank >= 1)).toBe(true);
 
     const city = arena.board(userId, 'city', 'pk-pb-lhr', 'season');
-    expect(city.entries.length).toBeGreaterThan(0);
-    expect(city.you?.userId).toBe(userId);
+    expect(city.entries.some((e) => e.userId === userId)).toBe(true);
 
-    arena.setPrivacy(userId, false, 'Arena Pilot');
-    const city2 = arena.board(userId, 'city', 'pk-pb-lhr', 'season');
-    expect(city2.entries.find((e) => e.userId === userId)).toBeUndefined();
+    arena.setPrivacy(userId, false);
+    const hidden = arena.board(userId, 'city', 'pk-pb-lhr', 'season');
+    expect(hidden.entries.some((e) => e.userId === userId)).toBe(false);
   });
 });

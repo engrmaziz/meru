@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException } from '@nestjs/common';
 import { JobsService } from './jobs.controller';
+import { LaunchService } from './launch.service';
 import { VaultService } from './vault.controller';
 import { WorkshopsService } from './workshops.controller';
 
@@ -10,7 +11,7 @@ describe('WorkshopsService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [VaultService, WorkshopsService, JobsService],
+      providers: [LaunchService, VaultService, WorkshopsService, JobsService],
     }).compile();
     workshops = module.get(WorkshopsService);
     vault = module.get(VaultService);
@@ -35,8 +36,9 @@ describe('WorkshopsService', () => {
     workshops.holdSlot('user-a', slotId);
     expect(() => workshops.holdSlot('user-b', slotId)).toThrow(ConflictException);
 
-    // Force expiry
-    const holdMap = (workshops as unknown as { holds: Map<string, { expiresAtMs: number }> }).holds;
+    const holdMap = (
+      workshops as unknown as { holds: Map<string, { expiresAtMs: number }> }
+    ).holds;
     const hold = holdMap.get(slotId)!;
     hold.expiresAtMs = Date.now() - 1;
     workshops.releaseExpiredForTest();

@@ -684,6 +684,27 @@ data class DisputeRequest(
     val reason: String = "owner_dispute",
 )
 
+@Serializable
+data class PublicFlagsDto(
+    val softLaunchCityId: String = "pk-pb-lhr",
+    val softLaunchCityName: String = "Lahore",
+    val s2Leaderboards: Boolean = true,
+    val s3Garage: Boolean = true,
+    val s4Marketplace: Boolean = true,
+    val ghostDriver: Boolean = true,
+    val challengesEnabled: Boolean = true,
+    val accountDeletionEnabled: Boolean = true,
+    val bookingsEnabled: Boolean = true,
+    val integrityCompetitiveMin: Int = 75,
+    val weightsVersion: Int = 1,
+)
+
+@Serializable
+data class DeleteAccountResponse(
+    val deleted: Boolean = false,
+    val retentionNote: String = "",
+)
+
 interface MeruApi {
     @GET("health")
     suspend fun health(): HealthResponse
@@ -894,6 +915,12 @@ interface MeruApi {
         @Header("Authorization") authorization: String,
         @Body body: ReviewRequest,
     ): ReviewDto
+
+    @GET("v1/flags")
+    suspend fun publicFlags(): PublicFlagsDto
+
+    @retrofit2.http.HTTP(method = "DELETE", path = "v1/account", hasBody = false)
+    suspend fun deleteAccount(@Header("Authorization") authorization: String): DeleteAccountResponse
 }
 
 @Module

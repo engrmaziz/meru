@@ -5,6 +5,8 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { HealthController } from './health.controller';
 import { JobsController, JobsService } from './jobs.controller';
+import { LaunchController } from './launch.controller';
+import { LaunchService } from './launch.service';
 import { ProgressionController } from './progression.controller';
 import { ProgressionService } from './progression.service';
 import { TripsController, TripsService } from './trips.controller';
@@ -22,9 +24,11 @@ import { WorkshopsController, WorkshopsService } from './workshops.controller';
     VaultController,
     WorkshopsController,
     JobsController,
+    LaunchController,
   ],
   providers: [
     AuthService,
+    LaunchService,
     TripsService,
     ProgressionService,
     ArenaService,

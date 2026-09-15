@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { LaunchService } from './launch.service';
 import type { TripUpsertBody } from './trips.types';
 
 /** Versioned weights — never hard-code in the APK (DEC / Phase 5). */
@@ -176,8 +177,15 @@ export class ProgressionService {
   private readonly users = new Map<string, UserProgress>();
   private readonly weights: ScoreWeights = SCORE_WEIGHTS_V1;
 
+  constructor(private readonly launch: LaunchService) {}
+
   getWeights() {
-    return { ...this.weights };
+    const f = this.launch.getFlags();
+    return {
+      ...this.weights,
+      integrityCompetitiveMin: f.integrityCompetitiveMin,
+      version: f.weightsVersion || this.weights.version,
+    };
   }
 
   getOrCreate(userId: string): UserProgress {
@@ -265,7 +273,7 @@ export class ProgressionService {
    */
   finalizeTrip(userId: string, tripId: string, body: TripUpsertBody, integrity: number) {
     const u = this.getOrCreate(userId);
-    const w = this.weights;
+    const w = this.getWeights();
 
     const hardBrakes = (body.events ?? []).filter((e) => e.type === 'BRAKING').length;
     const distanceM = body.distanceM ?? 0;

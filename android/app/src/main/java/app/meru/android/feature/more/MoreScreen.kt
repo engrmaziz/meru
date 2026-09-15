@@ -30,10 +30,12 @@ import app.meru.android.core.datastore.ProgressionStore
 import app.meru.android.core.datastore.SessionStore
 import app.meru.android.core.designsystem.components.MeruSecondaryButton
 import app.meru.android.core.designsystem.theme.MeruAmber
+import app.meru.android.core.designsystem.theme.MeruCyan
 import app.meru.android.core.designsystem.theme.MeruMuted
 import app.meru.android.core.designsystem.theme.MeruTeal
 import app.meru.android.core.designsystem.theme.MeruText
 import app.meru.android.core.designsystem.theme.MeruVoid
+import app.meru.android.core.flags.FeatureFlags
 import app.meru.android.core.network.MeruApi
 import app.meru.android.core.network.PrivacyPatchRequest
 import app.meru.android.engine.sensors.CalibrationStore
@@ -53,6 +55,7 @@ class MoreViewModel @Inject constructor(
     private val calibrationStore: CalibrationStore,
     private val progressionStore: ProgressionStore,
     private val api: MeruApi,
+    private val featureFlags: FeatureFlags,
 ) : ViewModel() {
     val progression = progressionStore.snapshot.stateIn(
         viewModelScope,
@@ -60,8 +63,17 @@ class MoreViewModel @Inject constructor(
         ProgressionSnapshot(),
     )
 
+    val flags = featureFlags.flags
+
     private val _boardOptIn = MutableStateFlow(true)
     val boardOptIn: StateFlow<Boolean> = _boardOptIn.asStateFlow()
+
+    private val _message = MutableStateFlow<String?>(null)
+    val message: StateFlow<String?> = _message.asStateFlow()
+
+    init {
+        viewModelScope.launch { featureFlags.refresh() }
+    }
 
     fun refreshPrivacy() {
         viewModelScope.launch {
@@ -86,6 +98,18 @@ class MoreViewModel @Inject constructor(
 
     fun signOut() {
         viewModelScope.launch { sessionStore.clear() }
+    }
+
+    fun deleteAccount() {
+        viewModelScope.launch {
+            val token = sessionStore.session.first().accessToken ?: return@launch
+            runCatching {
+                api.deleteAccount("Bearer $token")
+                sessionStore.clear()
+            }.onFailure {
+                _message.value = "Delete failed — try again"
+            }
+        }
     }
 
     fun clearCalibration() {
@@ -113,7 +137,12 @@ fun MoreScreen(
     val scope = rememberCoroutineScope()
     val progression by viewModel.progression.collectAsState()
     val boardOptIn by viewModel.boardOptIn.collectAsState()
+    val flags by viewModel.flags.collectAsState()
+    val message by viewModel.message.collectAsState()
     LaunchedEffect(Unit) { viewModel.refreshPrivacy() }
+
+    val bayOpen = flags.s4Marketplace && flags.bookingsEnabled
+    val arenaOpen = flags.s2Leaderboards
 
     Column(
         modifier = Modifier
@@ -125,34 +154,52 @@ fun MoreScreen(
         Text("More", color = MeruText, fontSize = 28.sp)
         Spacer(modifier = Modifier.height(8.dp))
         Text("Cockpit settings for Meru.", color = MeruMuted)
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            "Soft launch · ${flags.softLaunchCityName}",
+            color = MeruCyan,
+            fontSize = 13.sp,
+        )
         if (driving) {
             Spacer(modifier = Modifier.height(8.dp))
             Text("Driving Mode — Arena & Bay locked", color = MeruAmber, fontSize = 13.sp)
         }
+        message?.let {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(it, color = MeruAmber, fontSize = 13.sp)
+        }
         Spacer(modifier = Modifier.height(24.dp))
         MeruSecondaryButton(
-            text = if (driving) "Bay (locked)" else "Bay — find workshops",
-            onClick = { if (!driving) onOpenWorkshops() },
+            text = when {
+                driving -> "Bay (locked)"
+                !bayOpen -> "Bay (paused)"
+                else -> "Bay — find workshops"
+            },
+            onClick = { if (!driving && bayOpen) onOpenWorkshops() },
         )
         Spacer(modifier = Modifier.height(12.dp))
         MeruSecondaryButton(
-            text = if (driving) "Bookings (locked)" else "My bookings",
-            onClick = { if (!driving) onOpenBookings() },
+            text = if (driving || !bayOpen) "Bookings (locked)" else "My bookings",
+            onClick = { if (!driving && bayOpen) onOpenBookings() },
         )
         Spacer(modifier = Modifier.height(12.dp))
         MeruSecondaryButton(
-            text = if (driving) "Stamp (locked)" else "Stamp — invoices & jobs",
-            onClick = { if (!driving) onOpenStamp() },
+            text = if (driving || !bayOpen) "Stamp (locked)" else "Stamp — invoices & jobs",
+            onClick = { if (!driving && bayOpen) onOpenStamp() },
         )
         Spacer(modifier = Modifier.height(12.dp))
         MeruSecondaryButton(
-            text = if (driving) "Arena (locked)" else "Arena boards",
-            onClick = { if (!driving) onOpenLeaderboards() },
+            text = when {
+                driving -> "Arena (locked)"
+                !arenaOpen -> "Arena (paused)"
+                else -> "Arena boards"
+            },
+            onClick = { if (!driving && arenaOpen) onOpenLeaderboards() },
         )
         Spacer(modifier = Modifier.height(12.dp))
         MeruSecondaryButton(
-            text = if (driving) "Adventure map (locked)" else "Adventure map",
-            onClick = { if (!driving) onOpenAdventureMap() },
+            text = if (driving || !arenaOpen) "Adventure map (locked)" else "Adventure map",
+            onClick = { if (!driving && arenaOpen) onOpenAdventureMap() },
         )
         Spacer(modifier = Modifier.height(12.dp))
         MeruSecondaryButton(text = "Achievements", onClick = onOpenAchievements)
@@ -191,6 +238,19 @@ fun MoreScreen(
             text = "Sign out",
             onClick = { scope.launch { viewModel.signOut() } },
         )
+        if (flags.accountDeletionEnabled) {
+            Spacer(modifier = Modifier.height(12.dp))
+            MeruSecondaryButton(
+                text = "Delete account",
+                onClick = { viewModel.deleteAccount() },
+            )
+            Text(
+                "Purges vault data from Meru servers (Play Data Safety).",
+                color = MeruMuted,
+                fontSize = 12.sp,
+                modifier = Modifier.padding(top = 6.dp),
+            )
+        }
         Spacer(modifier = Modifier.height(24.dp))
     }
 }

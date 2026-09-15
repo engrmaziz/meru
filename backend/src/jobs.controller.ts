@@ -15,6 +15,7 @@ import {
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { parseBearerUserId } from './auth.util';
+import { LaunchService } from './launch.service';
 import { SERVICE_TAXONOMY, VaultService } from './vault.controller';
 import { WorkshopsService } from './workshops.controller';
 
@@ -95,6 +96,7 @@ export class JobsService {
     private readonly vault: VaultService,
     @Inject(forwardRef(() => WorkshopsService))
     private readonly workshops: WorkshopsService,
+    private readonly launch: LaunchService,
   ) {}
 
   createFromBooking(booking: {
@@ -331,6 +333,7 @@ export class JobsService {
     inv.serviceRecordId = writeback.id;
     job.status = 'closed';
     this.workshops.markBookingCompleted(job.bookingId);
+    this.launch.bump('invoicesConfirmed');
 
     // Update workshop rating aggregate lightly after close (reviews bump later)
     return { invoice: inv, writeback, duplicated: writeback.duplicated };
