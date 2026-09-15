@@ -356,6 +356,15 @@ data class TimelineItemDto(
     val kind: String,
     val title: String,
     val subtitle: String? = null,
+    val meta: TimelineMetaDto? = null,
+)
+
+@Serializable
+data class TimelineMetaDto(
+    val certified: Boolean = false,
+    val nextDueAtMs: Long? = null,
+    val invoiceId: String? = null,
+    val source: String? = null,
 )
 
 @Serializable
@@ -569,6 +578,112 @@ data class NotifDto(
     val read: Boolean = false,
 )
 
+@Serializable
+data class JobDto(
+    val id: String,
+    val bookingId: String = "",
+    val workshopId: String = "",
+    val vehicleId: String = "",
+    val status: String = "confirmed",
+    val workshopName: String? = null,
+    val extras: List<ExtraWorkDto> = emptyList(),
+    val invoice: JobInvoiceSummaryDto? = null,
+    val historyShareToken: String? = null,
+)
+
+@Serializable
+data class ExtraWorkDto(
+    val id: String,
+    val description: String = "",
+    val estimatedCost: Double = 0.0,
+    val status: String = "pending",
+)
+
+@Serializable
+data class JobInvoiceSummaryDto(
+    val id: String,
+    val total: Double = 0.0,
+    val status: String = "issued",
+    val pdfUrl: String = "",
+)
+
+@Serializable
+data class JobsListResponse(
+    val items: List<JobDto> = emptyList(),
+)
+
+@Serializable
+data class InvoiceDto(
+    val id: String,
+    val jobId: String = "",
+    val vehicleId: String = "",
+    val workshopId: String = "",
+    val lines: List<InvoiceLineDto> = emptyList(),
+    val laborTotal: Double = 0.0,
+    val partsTotal: Double = 0.0,
+    val feesTotal: Double = 0.0,
+    val total: Double = 0.0,
+    val pdfUrl: String = "",
+    val status: String = "issued",
+    val createdAtMs: Long = 0,
+    val serviceRecordId: String? = null,
+)
+
+@Serializable
+data class InvoiceLineDto(
+    val kind: String = "labor",
+    val label: String = "",
+    val qty: Double = 1.0,
+    val unitPrice: Double = 0.0,
+    val serviceTypeId: String? = null,
+)
+
+@Serializable
+data class InvoicesListResponse(
+    val items: List<InvoiceDto> = emptyList(),
+)
+
+@Serializable
+data class ConfirmInvoiceResponse(
+    val invoice: InvoiceDto,
+    val writeback: WritebackDto? = null,
+    val duplicated: Boolean = false,
+)
+
+@Serializable
+data class WritebackDto(
+    val id: String,
+    val certified: Boolean = false,
+    val invoiceId: String? = null,
+    val workshopName: String? = null,
+    val serviceTypeIds: List<String> = emptyList(),
+)
+
+@Serializable
+data class ExtraDecisionRequest(
+    val approve: Boolean,
+)
+
+@Serializable
+data class ReviewRequest(
+    val jobId: String,
+    val rating: Int,
+    val comment: String? = null,
+)
+
+@Serializable
+data class ReviewDto(
+    val id: String,
+    val jobId: String,
+    val rating: Int,
+    val comment: String? = null,
+)
+
+@Serializable
+data class DisputeRequest(
+    val reason: String = "owner_dispute",
+)
+
 interface MeruApi {
     @GET("health")
     suspend fun health(): HealthResponse
@@ -734,6 +849,51 @@ interface MeruApi {
 
     @GET("v1/notifications")
     suspend fun notifications(@Header("Authorization") authorization: String): NotificationsResponse
+
+    @GET("v1/jobs/mine")
+    suspend fun myJobs(@Header("Authorization") authorization: String): JobsListResponse
+
+    @GET("v1/jobs/{id}")
+    suspend fun job(
+        @Header("Authorization") authorization: String,
+        @retrofit2.http.Path("id") id: String,
+    ): JobDto
+
+    @POST("v1/jobs/{id}/extras/{eid}/decision")
+    suspend fun decideExtra(
+        @Header("Authorization") authorization: String,
+        @retrofit2.http.Path("id") id: String,
+        @retrofit2.http.Path("eid") eid: String,
+        @Body body: ExtraDecisionRequest,
+    ): ExtraWorkDto
+
+    @GET("v1/invoices")
+    suspend fun invoices(@Header("Authorization") authorization: String): InvoicesListResponse
+
+    @GET("v1/invoices/{id}")
+    suspend fun invoice(
+        @Header("Authorization") authorization: String,
+        @retrofit2.http.Path("id") id: String,
+    ): InvoiceDto
+
+    @POST("v1/invoices/{id}/confirm")
+    suspend fun confirmInvoice(
+        @Header("Authorization") authorization: String,
+        @retrofit2.http.Path("id") id: String,
+    ): ConfirmInvoiceResponse
+
+    @POST("v1/invoices/{id}/dispute")
+    suspend fun disputeInvoice(
+        @Header("Authorization") authorization: String,
+        @retrofit2.http.Path("id") id: String,
+        @Body body: DisputeRequest = DisputeRequest(),
+    ): InvoiceDto
+
+    @POST("v1/reviews")
+    suspend fun submitReview(
+        @Header("Authorization") authorization: String,
+        @Body body: ReviewRequest,
+    ): ReviewDto
 }
 
 @Module

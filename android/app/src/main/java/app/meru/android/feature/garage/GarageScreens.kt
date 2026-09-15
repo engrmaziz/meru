@@ -1,6 +1,9 @@
 package app.meru.android.feature.garage
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -531,7 +535,18 @@ fun VehicleTimelineScreen(
                         .background(MeruElevated)
                         .padding(12.dp),
                 ) {
-                    Text(item.kind.uppercase(Locale.US), color = MeruTeal, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            item.kind.uppercase(Locale.US),
+                            color = MeruTeal,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.weight(1f),
+                        )
+                        if (item.meta?.certified == true) {
+                            CertifiedStampChip()
+                        }
+                    }
                     Text(item.title, color = MeruText, fontWeight = FontWeight.Medium)
                     item.subtitle?.let { Text(it, color = MeruMuted, fontSize = 12.sp) }
                 }
@@ -643,4 +658,26 @@ private fun SummaryChip(modifier: Modifier, label: String, value: String) {
         Text(label, color = MeruMuted, fontSize = 11.sp)
         Text(value, color = MeruText, fontWeight = FontWeight.Bold)
     }
+}
+
+@Composable
+private fun CertifiedStampChip() {
+    val scale = remember { Animatable(0.6f) }
+    LaunchedEffect(Unit) {
+        scale.animateTo(1f, tween(420))
+    }
+    Text(
+        "CERTIFIED",
+        color = MeruTeal,
+        fontSize = 10.sp,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier
+            .graphicsLayer {
+                scaleX = scale.value
+                scaleY = scale.value
+                rotationZ = -8f
+            }
+            .border(1.dp, MeruTeal, RoundedCornerShape(4.dp))
+            .padding(horizontal = 6.dp, vertical = 2.dp),
+    )
 }

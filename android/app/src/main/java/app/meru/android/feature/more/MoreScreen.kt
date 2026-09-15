@@ -106,6 +106,7 @@ fun MoreScreen(
     onOpenAdventureMap: () -> Unit = {},
     onOpenWorkshops: () -> Unit = {},
     onOpenBookings: () -> Unit = {},
+    onOpenStamp: () -> Unit = {},
     driving: Boolean = false,
     viewModel: MoreViewModel = hiltViewModel(),
 ) {
@@ -137,6 +138,11 @@ fun MoreScreen(
         MeruSecondaryButton(
             text = if (driving) "Bookings (locked)" else "My bookings",
             onClick = { if (!driving) onOpenBookings() },
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        MeruSecondaryButton(
+            text = if (driving) "Stamp (locked)" else "Stamp — invoices & jobs",
+            onClick = { if (!driving) onOpenStamp() },
         )
         Spacer(modifier = Modifier.height(12.dp))
         MeruSecondaryButton(

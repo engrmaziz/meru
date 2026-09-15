@@ -13,6 +13,13 @@
 
 ---
 
+## DEC-025 — Phase 9 Stamp writeback + staff web MVP
+- **Date:** 2026-09-15
+- **Status:** Accepted
+- **Decision:** Jobs auto-spawn from bookings. Staff uses `X-Workshop-Id` + Bearer (role JWT later). Invoice confirm is the only path that sets `certified=true` vault services (`source=mechanic_issued_bill`). PDF is R2 URL stub. Workshop staff UI = Next.js `workshop-web` on port 3001 (DEC-014). Extras require owner approve/deny before bill. Reviews only when job `closed`.
+- **Why:** Completes S3↔S4 “service saves into my car’s life” without payments or Postgres yet.
+- **Consequences:** Real R2 PDF + staff RBAC before production; Strix on staging for IDOR on invoices/shares.
+
 ## DEC-024 — Phase 8 Bay holds (in-memory NX EX 120)
 - **Date:** 2026-09-15
 - **Status:** Accepted

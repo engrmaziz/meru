@@ -48,6 +48,7 @@ import app.meru.android.core.designsystem.theme.MeruPanel
 import app.meru.android.core.designsystem.theme.MeruTeal
 import app.meru.android.core.designsystem.theme.MeruVoid
 import app.meru.android.core.network.BookingDto
+import app.meru.android.core.network.ConfirmInvoiceResponse
 import app.meru.android.engine.drive.DrivingMode
 import app.meru.android.feature.arena.AdventureMapScreen
 import app.meru.android.feature.arena.LeaderboardsScreen
@@ -68,6 +69,9 @@ import app.meru.android.feature.home.HomeScreen
 import app.meru.android.feature.more.MoreScreen
 import app.meru.android.feature.progression.AchievementsScreen
 import app.meru.android.feature.progression.ChallengesScreen
+import app.meru.android.feature.stamp.CertifiedStampScreen
+import app.meru.android.feature.stamp.InvoiceReviewScreen
+import app.meru.android.feature.stamp.JobsInvoicesScreen
 import app.meru.android.feature.trips.TripDetailScreen
 import app.meru.android.feature.trips.TripProcessingScreen
 import app.meru.android.feature.trips.TripSummaryScreen
@@ -149,9 +153,13 @@ private fun MainGraph(rootViewModel: RootViewModel) {
         current == MeruRoute.Workshops.path ||
         current == MeruRoute.MyBookings.path ||
         current?.startsWith("workshop/") == true ||
-        current == MeruRoute.BookingConfirmed.path
+        current == MeruRoute.BookingConfirmed.path ||
+        current == MeruRoute.Stamp.path ||
+        current?.startsWith("invoice/") == true ||
+        current == MeruRoute.CertifiedStamp.path
 
     var lastBooking by remember { mutableStateOf<BookingDto?>(null) }
+    var lastStamp by remember { mutableStateOf<ConfirmInvoiceResponse?>(null) }
 
     Scaffold(
         containerColor = MeruVoid,
@@ -266,6 +274,9 @@ private fun MainGraph(rootViewModel: RootViewModel) {
                     onOpenBookings = {
                         if (!driving) navController.navigate(MeruRoute.MyBookings.path)
                     },
+                    onOpenStamp = {
+                        if (!driving) navController.navigate(MeruRoute.Stamp.path)
+                    },
                     driving = driving,
                 )
             }
@@ -334,6 +345,39 @@ private fun MainGraph(rootViewModel: RootViewModel) {
                         onDone = {
                             navController.navigate(MeruRoute.MyBookings.path) {
                                 popUpTo(MeruRoute.Workshops.path) { inclusive = false }
+                            }
+                        },
+                    )
+                }
+            }
+            composable(MeruRoute.Stamp.path) {
+                JobsInvoicesScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenInvoice = { id -> navController.navigate(MeruRoute.InvoiceReview.create(id)) },
+                    driving = driving,
+                )
+            }
+            composable(
+                route = MeruRoute.InvoiceReview.path,
+                arguments = listOf(navArgument("invoiceId") { type = NavType.StringType }),
+            ) {
+                InvoiceReviewScreen(
+                    onBack = { navController.popBackStack() },
+                    onStamped = { res ->
+                        lastStamp = res
+                        navController.navigate(MeruRoute.CertifiedStamp.path)
+                    },
+                    driving = driving,
+                )
+            }
+            composable(MeruRoute.CertifiedStamp.path) {
+                val stamp = lastStamp
+                if (stamp != null) {
+                    CertifiedStampScreen(
+                        result = stamp,
+                        onDone = {
+                            navController.navigate(MeruRoute.Garage.path) {
+                                popUpTo(MeruRoute.Home.path) { inclusive = false }
                             }
                         },
                     )

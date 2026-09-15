@@ -117,16 +117,17 @@ Select vehicle
  → Open profile (services/parts/hours + MapLibre pin)
  → Pick slot (in-memory NX hold TTL 120s; Redis upgrade DEC-024)
  → Booking confirm + history share (auto or token)
- → My Bookings + cancel; Driving Mode locks Bay UI
- → Workshop accept / check-in / invoice  [Phase 9+]
- → Certified service_record writeback into vault timeline
- → Review
+ → Job auto-created [Phase 9]
+ → Staff check-in → shared history (expires deny)
+ → Extras propose → owner approve/deny
+ → Invoice issue (PDF stub) → owner confirm
+ → Certified service_record writeback (source=mechanic_issued_bill)
+ → Review (closed jobs only)
 ```
 
-Workshop staff path (MVP = web portal):
+Workshop staff path (MVP = `workshop-web` Next.js):
 ```
-Signup/KYC → Catalog + hours + slots
- → Incoming bookings → Check-in → Job → Invoice → Done
+Token + X-Workshop-Id → Jobs calendar → Check-in → History → Invoice → Done
 ```
 
 ---

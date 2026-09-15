@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException } from '@nestjs/common';
+import { JobsService } from './jobs.controller';
 import { VaultService } from './vault.controller';
 import { WorkshopsService } from './workshops.controller';
 
@@ -9,7 +10,7 @@ describe('WorkshopsService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [VaultService, WorkshopsService],
+      providers: [VaultService, WorkshopsService, JobsService],
     }).compile();
     workshops = module.get(WorkshopsService);
     vault = module.get(VaultService);

@@ -106,20 +106,23 @@ Worker `trip.process`:
 | POST | `/bookings` | **Phase 8:** NX hold then confirm; attach/create history share |
 | GET | `/bookings` | my bookings |
 | POST | `/bookings/{id}/cancel` | frees slot |
-| GET | `/notifications` | booking confirmed/reminder stubs |
-| POST | `/workshops` | create + KYC pending (Phase 9 staff) |
-| PATCH | `/workshops/{id}` | owner |
-| CRUD | `/workshop-staff/services` | Phase 9 |
-| CRUD | `/workshop-staff/parts` | Phase 9 |
-| PUT | `/workshop-staff/hours` | Phase 9 |
+| GET | `/jobs/mine` | **Phase 9:** owner jobs |
+| GET | `/workshop-staff/jobs` | staff list (`X-Workshop-Id`) |
 | POST | `/jobs/{id}/check-in` | staff |
-| GET | `/jobs/{id}/shared-history` | staff + valid share |
-| POST | `/jobs/{id}/extras` | staff |
-| POST | `/jobs/{id}/extras/{eid}/decision` | owner |
-| POST | `/invoices` | staff issue |
-| POST | `/invoices/{id}/confirm` | owner → writeback |
-| POST | `/invoices/{id}/dispute` | |
-| POST | `/reviews` | completed jobs only |
+| POST | `/jobs/{id}/start` | staff |
+| GET | `/jobs/{id}/shared-history` | staff + valid share (expiry denies) |
+| POST | `/jobs/{id}/extras` | staff propose |
+| POST | `/jobs/{id}/extras/{eid}/decision` | owner approve/deny |
+| POST | `/invoices` | staff issue (R2 PDF stub) |
+| GET | `/invoices` | owner list |
+| POST | `/invoices/{id}/confirm` | **owner → certified writeback** |
+| POST | `/invoices/{id}/dispute` | no writeback |
+| POST | `/reviews` | closed jobs only |
+| POST | `/workshops` | create + KYC pending |
+| PATCH | `/workshops/{id}` | owner |
+| CRUD | `/workshop-staff/services` | later |
+| CRUD | `/workshop-staff/parts` | later |
+| PUT | `/workshop-staff/hours` | later |
 
 ### Slot concurrency
 - **Phase 8:** in-memory hold map `slotId → {userId, expiresAtMs}` TTL 120s (Redis `SET NX EX 120` upgrade path)  

@@ -79,6 +79,8 @@ type ServiceRecord = {
   nextDueOdometerKm?: number;
   certified: boolean;
   syncStatus: string;
+  source?: string;
+  invoiceId?: string;
 };
 
 type HistoryShare = {
@@ -322,6 +324,82 @@ export class VaultService {
     return { ...rec, duplicated: false };
   }
 
+  /**
+   * Owner-confirmed invoice writeback — only path that sets certified=true.
+   * Idempotent on invoiceId.
+   */
+  writebackCertified(
+    userId: string,
+    vehicleId: string,
+    body: {
+      invoiceId: string;
+      workshopName: string;
+      serviceTypeIds: string[];
+      parts?: ServicePart[];
+      laborCost: number;
+      partsCost: number;
+      notes?: string;
+      odometerKm?: number;
+    },
+  ) {
+    const v = this.requireOwned(userId, vehicleId);
+    const existing = (this.services.get(vehicleId) ?? []).find(
+      (s) => s.invoiceId === body.invoiceId,
+    );
+    if (existing) return { ...existing, duplicated: true };
+
+    const parts = body.parts ?? [];
+    const rec: ServiceRecord = {
+      id: randomUUID(),
+      vehicleId,
+      clientServiceId: `invoice:${body.invoiceId}`,
+      atMs: Date.now(),
+      odometerKm: body.odometerKm ?? v.odometerKm,
+      workshopName: body.workshopName,
+      serviceTypeIds: body.serviceTypeIds.length
+        ? body.serviceTypeIds
+        : ['other'],
+      notes: body.notes,
+      parts,
+      laborCost: body.laborCost,
+      partsCost: body.partsCost,
+      certified: true,
+      syncStatus: 'synced',
+      source: 'mechanic_issued_bill',
+      invoiceId: body.invoiceId,
+    };
+    const list = this.services.get(vehicleId) ?? [];
+    list.push(rec);
+    this.services.set(vehicleId, list);
+    return { ...rec, duplicated: false };
+  }
+
+  /** Staff redeem — denies expired / wrong vehicle shares */
+  redeemShare(token: string, vehicleId: string) {
+    const share = this.assertShareValid(token, vehicleId);
+    const v = this.vehicles.get(vehicleId);
+    if (!v) throw new NotFoundException('Vehicle not found');
+    const services = (this.services.get(vehicleId) ?? []).map((s) => ({
+      id: s.id,
+      atMs: s.atMs,
+      workshopName: s.workshopName,
+      serviceTypeIds: s.serviceTypeIds,
+      odometerKm: s.odometerKm,
+      certified: s.certified,
+    }));
+    return {
+      scope: share.scope,
+      vehicle: {
+        id: v.id,
+        make: v.make,
+        model: v.model,
+        year: v.year,
+        odometerKm: v.odometerKm,
+      },
+      services,
+    };
+  }
+
   timeline(userId: string, vehicleId: string) {
     const v = this.requireOwned(userId, vehicleId);
     const items: {
@@ -363,6 +441,8 @@ export class VaultService {
           certified: s.certified,
           nextDueAtMs: s.nextDueAtMs,
           serviceTypeIds: s.serviceTypeIds,
+          source: s.source,
+          invoiceId: s.invoiceId,
         },
       });
     }

@@ -5,16 +5,19 @@ import {
   Controller,
   Get,
   Headers,
+  Inject,
   Injectable,
   NotFoundException,
   Param,
   Post,
   Query,
   UnauthorizedException,
+  forwardRef,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { parseBearerUserId } from './auth.util';
 import { SERVICE_TAXONOMY, VaultService } from './vault.controller';
+import { JobsService } from './jobs.controller';
 
 export type WorkshopKind = 'specialist' | 'multi' | 'general';
 
@@ -85,7 +88,11 @@ export class WorkshopsService {
   private readonly bookings = new Map<string, Booking>();
   private readonly notifications = new Map<string, Notif[]>();
 
-  constructor(private readonly vault: VaultService) {
+  constructor(
+    private readonly vault: VaultService,
+    @Inject(forwardRef(() => JobsService))
+    private readonly jobs: JobsService,
+  ) {
     this.seedLahore();
   }
 
@@ -248,6 +255,7 @@ export class WorkshopsService {
       createdAtMs: Date.now(),
     };
     this.bookings.set(booking.id, booking);
+    this.jobs.createFromBooking(booking);
 
     this.pushNotif(userId, {
       type: 'booking_confirmed',
@@ -324,6 +332,36 @@ export class WorkshopsService {
 
   notifications(userId: string) {
     return { items: this.notifications.get(userId) ?? [] };
+  }
+
+  /** Called by JobsService */
+  pushNotifPublic(
+    userId: string,
+    partial: { type: string; title: string; body: string },
+  ) {
+    this.pushNotif(userId, partial);
+  }
+
+  getWorkshop(id: string) {
+    return this.workshops.get(id);
+  }
+
+  getBooking(id: string) {
+    return this.bookings.get(id);
+  }
+
+  markBookingCompleted(bookingId: string) {
+    const b = this.bookings.get(bookingId);
+    if (b && b.status === 'confirmed') b.status = 'completed';
+  }
+
+  applyReviewRating(workshopId: string, rating: number) {
+    const w = this.workshops.get(workshopId);
+    if (!w) return;
+    // ponytail: rolling average approximation
+    const n = w.jobsCompleted || 1;
+    w.rating = Math.round(((w.rating * n + rating) / (n + 1)) * 10) / 10;
+    w.jobsCompleted += 1;
   }
 
   /** Exposed for concurrency unit tests */

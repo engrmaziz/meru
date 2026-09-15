@@ -4,6 +4,7 @@ import { ArenaService } from './arena.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { HealthController } from './health.controller';
+import { JobsController, JobsService } from './jobs.controller';
 import { ProgressionController } from './progression.controller';
 import { ProgressionService } from './progression.service';
 import { TripsController, TripsService } from './trips.controller';
@@ -20,6 +21,7 @@ import { WorkshopsController, WorkshopsService } from './workshops.controller';
     ArenaController,
     VaultController,
     WorkshopsController,
+    JobsController,
   ],
   providers: [
     AuthService,
@@ -28,6 +30,7 @@ import { WorkshopsController, WorkshopsService } from './workshops.controller';
     ArenaService,
     VaultService,
     WorkshopsService,
+    JobsService,
   ],
 })
 export class AppModule {}

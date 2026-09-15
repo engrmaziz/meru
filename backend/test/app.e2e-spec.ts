@@ -117,5 +117,42 @@ describe('Meru API (e2e)', () => {
       .expect(201);
     expect(booking.body.historyShareToken).toBeTruthy();
     expect(booking.body.status).toBe('confirmed');
+
+    const mine = await request(app.getHttpServer())
+      .get('/v1/jobs/mine')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+    const job = mine.body.items[0];
+    expect(job).toBeTruthy();
+
+    await request(app.getHttpServer())
+      .post(`/v1/jobs/${job.id}/check-in`)
+      .set('Authorization', `Bearer ${token}`)
+      .set('X-Workshop-Id', list.body.items[0].id)
+      .expect(201);
+
+    const invoice = await request(app.getHttpServer())
+      .post('/v1/invoices')
+      .set('Authorization', `Bearer ${token}`)
+      .set('X-Workshop-Id', list.body.items[0].id)
+      .send({ jobId: job.id })
+      .expect(201);
+
+    const confirmed = await request(app.getHttpServer())
+      .post(`/v1/invoices/${invoice.body.id}/confirm`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(201);
+    expect(confirmed.body.writeback.certified).toBe(true);
+
+    const tl = await request(app.getHttpServer())
+      .get(`/v1/vehicles/${vehicle.body.id}/timeline`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+    expect(
+      tl.body.items.some(
+        (i: { meta?: { certified?: boolean; invoiceId?: string } }) =>
+          i.meta?.certified && i.meta?.invoiceId === invoice.body.id,
+      ),
+    ).toBe(true);
   });
 });

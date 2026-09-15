@@ -109,6 +109,20 @@
 - **Strix:** skipped
 - **Follow-ups:** Phase 7 Vault (garage)
 
+### 2026-09-15 — Phase 9 Stamp jobs & vault writeback
+- **Band / slice:** Phase 9 / Stamp
+- **Agent:** Cursor agent (commits as engrmaziz only)
+- **Ponytail rung used:** YAGNI (in-memory jobs/invoices) + reuse (Vault writeback + Bay bookings) + Next.js staff MVP
+- **Context7 libs:** n/a
+- **Stitch screens:** Compose Stamp / invoice / certified stamp hand-built
+- **DEC referenced:** DEC-011, DEC-014, DEC-019, DEC-025
+- **What shipped:** Job lifecycle; staff check-in + shared history (share expiry denies); extras approve/deny; invoice issue/confirm/dispute; certified timeline writeback; reviews; Android Stamp UI + CERTIFIED chip; `workshop-web` staff portal
+- **What deferred (ponytail:):** Real R2 PDF bytes; staff JWT roles; payments; Postgres unique constraints
+- **Gamify/motion added:** Certified stamp scale celebration + timeline CERTIFIED chip
+- **Tests:** JobsService writeback / no-confirm / share expiry / review gate; e2e confirm→timeline
+- **Strix:** pass #1 notes (manual checklist, no staging deploy): verify IDOR on `GET/POST /v1/invoices/*` (foreign user 403), share expiry on `GET /v1/jobs/:id/shared-history`, workshop header mismatch 403, confirm required before certified. Full Strix deferred to Phase 10 staging URL.
+- **Follow-ups:** Phase 10 Summit harden + soft launch
+
 ### 2026-09-15 — Phase 8 Bay discovery & booking
 - **Band / slice:** Phase 8 / Bay
 - **Agent:** Cursor agent (commits as engrmaziz only)

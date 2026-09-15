@@ -20,7 +20,8 @@ Android-first driving adventure — telemetry, ascent ranks, vehicle vault, work
 | 6 | Arena | Done — seasonal boards, friends, adventure map, privacy |
 | 7 | Vault | Done — garage, timeline, entitlement, offline services |
 | 8 | Bay | Done — workshop discovery, holds, bookings + history share |
-| 9–10 | … | Planned — see `plan/` |
+| 9 | Stamp | Done — jobs, invoices, certified vault writeback, staff web |
+| 10 | Summit | Planned — see `plan/10.md` |
 
 ---
 
@@ -85,6 +86,13 @@ Android-first driving adventure — telemetry, ascent ranks, vehicle vault, work
 - Profile + MapLibre pin; services/slots; booking hold (in-memory NX EX 120)
 - History share attached on confirm; My Bookings + cancel; Driving Mode locks Bay
 - Notifications stub (confirmed + reminder)
+
+## Phase 9 — Stamp
+
+- Job lifecycle from booking; staff check-in + shared history (share-gated)
+- Extra-work approve/deny; invoice issue (PDF stub) → owner confirm → certified vault writeback
+- Dispute blocks writeback; reviews only on closed jobs
+- Android Stamp screens + CERTIFIED timeline stamp; `workshop-web` Next.js staff MVP
 
 ---
 
