@@ -7,19 +7,23 @@ import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import app.meru.android.core.database.TripEntity
 import app.meru.android.engine.drive.DriveForegroundService
 import app.meru.android.engine.drive.DriveSessionController
 import app.meru.android.engine.sensors.CalibrationStore
 import app.meru.android.engine.sensors.MotionEngine
 import app.meru.android.engine.sensors.MotionSample
+import app.meru.android.engine.sync.TripSyncWorker
 import app.meru.android.engine.telemetry.LiveTelemetry
 import app.meru.android.engine.telemetry.RoutePoint
+import app.meru.android.engine.trip.TripProcessor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -31,15 +35,16 @@ data class DriveUiState(
     val needsNotificationPermission: Boolean = false,
     val calibrated: Boolean = false,
     val error: String? = null,
-    val lastCompleted: TripEntity? = null,
     val confirmEnd: Boolean = false,
     val mapExpanded: Boolean = false,
+    val ending: Boolean = false,
 )
 
 @HiltViewModel
 class DriveViewModel @Inject constructor(
     application: Application,
     private val session: DriveSessionController,
+    private val tripProcessor: TripProcessor,
     motionEngine: MotionEngine,
     calibrationStore: CalibrationStore,
 ) : AndroidViewModel(application) {
@@ -55,6 +60,9 @@ class DriveViewModel @Inject constructor(
 
     private val _ui = MutableStateFlow(DriveUiState())
     val ui: StateFlow<DriveUiState> = _ui.asStateFlow()
+
+    private val _openProcessing = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val openProcessing: SharedFlow<String> = _openProcessing.asSharedFlow()
 
     init {
         refreshPermissions()
@@ -114,12 +122,23 @@ class DriveViewModel @Inject constructor(
     }
 
     fun endDrive() {
+        if (_ui.value.ending) return
         viewModelScope.launch {
-            val completed = if (session.isActive) session.endDrive() else null
-            getApplication<Application>().stopService(
-                android.content.Intent(getApplication(), DriveForegroundService::class.java),
-            )
-            _ui.value = _ui.value.copy(confirmEnd = false, lastCompleted = completed, error = null)
+            _ui.value = _ui.value.copy(confirmEnd = false, ending = true, error = null)
+            runCatching {
+                val completed = if (session.isActive) session.endDrive() else null
+                getApplication<Application>().stopService(
+                    android.content.Intent(getApplication(), DriveForegroundService::class.java),
+                )
+                if (completed != null) {
+                    tripProcessor.process(completed.id)
+                    TripSyncWorker.enqueue(getApplication())
+                    _openProcessing.emit(completed.id)
+                }
+            }.onFailure { e ->
+                _ui.value = _ui.value.copy(error = e.message ?: "Could not finish trip")
+            }
+            _ui.value = _ui.value.copy(ending = false)
         }
     }
 }

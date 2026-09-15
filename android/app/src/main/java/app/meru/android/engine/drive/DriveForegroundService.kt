@@ -15,6 +15,8 @@ import androidx.core.app.ServiceCompat
 import app.meru.android.MainActivity
 import app.meru.android.R
 import app.meru.android.engine.location.FusedLocationClient
+import app.meru.android.engine.sync.TripSyncWorker
+import app.meru.android.engine.trip.TripProcessor
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -31,6 +33,7 @@ class DriveForegroundService : Service() {
 
     @Inject lateinit var session: DriveSessionController
     @Inject lateinit var locationClient: FusedLocationClient
+    @Inject lateinit var tripProcessor: TripProcessor
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var locationJob: Job? = null
@@ -42,7 +45,13 @@ class DriveForegroundService : Service() {
         when (intent?.action) {
             ACTION_STOP -> {
                 scope.launch {
-                    session.endDrive()
+                    val completed = session.endDrive()
+                    if (completed != null && completed.status == "completed") {
+                        runCatching {
+                            tripProcessor.process(completed.id)
+                            TripSyncWorker.enqueue(applicationContext)
+                        }
+                    }
                     stopSelfSafe()
                 }
                 return START_NOT_STICKY

@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.meru.android.core.database.ExplorationDao
+import app.meru.android.core.database.TripDao
 import app.meru.android.core.datastore.SessionStore
 import app.meru.android.core.designsystem.theme.MeruElevated
 import app.meru.android.core.designsystem.theme.MeruMuted
@@ -30,19 +32,54 @@ import app.meru.android.core.designsystem.theme.MeruTeal
 import app.meru.android.core.designsystem.theme.MeruText
 import app.meru.android.core.designsystem.theme.MeruVoid
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.util.Locale
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+
+data class HomeStats(
+    val tripCount: Int = 0,
+    val distanceKm: Double = 0.0,
+    val bestQuality: Int = 0,
+    val longestKm: Double = 0.0,
+    val cells: Int = 0,
+    val xp: Int = 0,
+)
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     sessionStore: SessionStore,
+    private val tripDao: TripDao,
+    private val explorationDao: ExplorationDao,
 ) : ViewModel() {
     val session = sessionStore.session.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5_000),
         null,
     )
+
+    private val _stats = MutableStateFlow(HomeStats())
+    val stats: StateFlow<HomeStats> = _stats.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            tripDao.observeCompletedTrips().collect { trips ->
+                val xp = trips.sumOf { it.explorationXp }
+                _stats.value = HomeStats(
+                    tripCount = trips.size,
+                    distanceKm = trips.sumOf { it.distanceM } / 1000.0,
+                    bestQuality = trips.maxOfOrNull { it.qualityScore } ?: 0,
+                    longestKm = (trips.maxOfOrNull { it.distanceM } ?: 0.0) / 1000.0,
+                    cells = explorationDao.cellCount(),
+                    xp = xp,
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -50,7 +87,11 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val session by viewModel.session.collectAsState()
+    val stats by viewModel.stats.collectAsState()
     val name = session?.displayName ?: "Driver"
+    val level = 1 + stats.xp / 1000
+    val intoLevel = stats.xp % 1000
+    val progress = intoLevel / 1000f
 
     Column(
         modifier = Modifier
@@ -69,10 +110,10 @@ fun HomeScreen(
                 .background(MeruElevated)
                 .padding(18.dp),
         ) {
-            Text("LEVEL 1", color = MeruTeal, fontWeight = FontWeight.Bold)
+            Text("LEVEL $level", color = MeruTeal, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(8.dp))
             LinearProgressIndicator(
-                progress = { 0.12f },
+                progress = { progress },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(8.dp)
@@ -81,31 +122,45 @@ fun HomeScreen(
                 trackColor = MeruVoid,
             )
             Spacer(Modifier.height(8.dp))
-            Text("1,200 / 10,000 XP", color = MeruMuted, fontSize = 13.sp)
+            Text("$intoLevel / 1000 XP toward next", color = MeruMuted, fontSize = 13.sp)
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(modifier.height(16.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            StatChip(modifier = Modifier.weight(1f), label = "Adventure", value = "—")
-            StatChip(modifier = Modifier.weight(1f), label = "Rating", value = "—")
+            StatChip(
+                modifier = Modifier.weight(1f),
+                label = "Distance",
+                value = String.format(Locale.US, "%.1f km", stats.distanceKm),
+            )
+            StatChip(
+                modifier = Modifier.weight(1f),
+                label = "Best Q",
+                value = if (stats.bestQuality > 0) stats.bestQuality.toString() else "—",
+            )
         }
-        Spacer(Modifier.height(12.dp))
+        Spacer(modifier.height(12.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            StatChip(modifier = Modifier.weight(1f), label = "City rank", value = "Soon")
-            StatChip(modifier = Modifier.weight(1f), label = "Streak", value = "0")
+            StatChip(modifier = Modifier.weight(1f), label = "Trips", value = stats.tripCount.toString())
+            StatChip(modifier = Modifier.weight(1f), label = "Cells", value = stats.cells.toString())
         }
+        Spacer(modifier.height(12.dp))
+        StatChip(
+            modifier = Modifier.fillMaxWidth(),
+            label = "Longest ascent",
+            value = String.format(Locale.US, "%.2f km", stats.longestKm),
+        )
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(modifier.height(24.dp))
         Text("Next ascent", color = MeruText, fontWeight = FontWeight.Medium)
         Spacer(Modifier.height(8.dp))
         Text(
-            "Open Drive when you are ready. Phase 2 wires the engine.",
+            "Open Drive — after each trip, Afterglow seals score, XP, and sync.",
             color = MeruMuted,
         )
     }

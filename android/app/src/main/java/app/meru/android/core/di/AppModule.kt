@@ -2,6 +2,7 @@ package app.meru.android.core.di
 
 import android.content.Context
 import androidx.room.Room
+import app.meru.android.core.database.ExplorationDao
 import app.meru.android.core.database.MeruDatabase
 import app.meru.android.core.database.PendingSyncDao
 import app.meru.android.core.database.TripDao
@@ -24,6 +25,9 @@ object AppModule {
 
     @Provides
     fun tripDao(db: MeruDatabase): TripDao = db.tripDao()
+
+    @Provides
+    fun explorationDao(db: MeruDatabase): ExplorationDao = db.explorationDao()
 
     @Provides
     fun pendingSyncDao(db: MeruDatabase): PendingSyncDao = db.pendingSyncDao()

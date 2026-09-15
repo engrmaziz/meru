@@ -35,4 +35,39 @@ describe('Meru API (e2e)', () => {
         expect(res.body.accessToken).toBeTruthy();
       });
   });
+
+  it('/v1/trips (POST) idempotent upsert', async () => {
+    const auth = await request(app.getHttpServer())
+      .post('/v1/auth/register')
+      .send({ email: 'trips@meru.app', password: 'secret1', displayName: 'Trips' })
+      .expect(201);
+
+    const token = auth.body.accessToken as string;
+    const payload = {
+      clientTripId: 'client-trip-1',
+      startAtMs: Date.now() - 60_000,
+      endAtMs: Date.now(),
+      distanceM: 3200,
+      durationMs: 60_000,
+      qualityScore: 90,
+      locations: [{ ts: Date.now(), lat: 24.86, lon: 67.0 }],
+      events: [{ ts: Date.now(), type: 'START', label: 'Drive started' }],
+    };
+
+    const first = await request(app.getHttpServer())
+      .post('/v1/trips')
+      .set('Authorization', `Bearer ${token}`)
+      .send(payload)
+      .expect(201);
+
+    const second = await request(app.getHttpServer())
+      .post('/v1/trips')
+      .set('Authorization', `Bearer ${token}`)
+      .send(payload)
+      .expect(201);
+
+    expect(first.body.duplicated).toBe(false);
+    expect(second.body.duplicated).toBe(true);
+    expect(second.body.id).toBe(first.body.id);
+  });
 });

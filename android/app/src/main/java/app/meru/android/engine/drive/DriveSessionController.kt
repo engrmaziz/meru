@@ -1,7 +1,5 @@
 package app.meru.android.engine.drive
 
-import app.meru.android.core.database.PendingSyncDao
-import app.meru.android.core.database.PendingSyncEntity
 import app.meru.android.core.database.TripDao
 import app.meru.android.core.database.TripEntity
 import app.meru.android.core.database.TripLocationEntity
@@ -18,12 +16,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.json.JSONObject
 
 @Singleton
 class DriveSessionController @Inject constructor(
     private val tripDao: TripDao,
-    private val pendingSyncDao: PendingSyncDao,
     private val drivingMode: DrivingMode,
     private val motionEngine: MotionEngine,
 ) {
@@ -107,16 +103,6 @@ class DriveSessionController @Inject constructor(
             syncStatus = "pending",
         )
         tripDao.upsertTrip(completed)
-        pendingSyncDao.upsert(
-            PendingSyncEntity(
-                id = tripId,
-                type = "trip_complete",
-                payloadJson = JSONObject()
-                    .put("tripId", tripId)
-                    .put("distanceM", completed.distanceM)
-                    .toString(),
-            ),
-        )
         motionEngine.stop()
         accumulator.reset()
         drivingMode.setActive(false)

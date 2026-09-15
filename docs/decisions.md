@@ -13,6 +13,13 @@
 
 ---
 
+## DEC-020 — Phase 4 trip sync = single idempotent upsert
+- **Date:** 2026-09-15
+- **Status:** Accepted
+- **Decision:** Client posts one `POST /v1/trips` body (metrics + downsampled locations + events) keyed by `clientTripId`. Server dedupes per `userId:clientTripId`. Location/event batch endpoints from ANNEX-B deferred until volume requires them.
+- **Why:** Ponytail for S1 Afterglow; offline queue is WorkManager + `pending_sync` payload JSON.
+- **Consequences:** ANNEX-B batch paths remain the upgrade path; integrity is a stub (+2 from client quality) until a real process worker.
+
 ## DEC-019 — Commit & push after every phase
 - **Date:** 2026-09-15
 - **Status:** Accepted

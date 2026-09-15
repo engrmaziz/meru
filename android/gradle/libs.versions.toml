@@ -20,6 +20,8 @@ espresso = "3.6.1"
 playServicesLocation = "21.3.0"
 truth = "1.4.4"
 maplibre = "11.8.0"
+work = "2.9.1"
+hiltWork = "1.2.0"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
@@ -55,6 +57,9 @@ androidx-junit = { module = "androidx.test.ext:junit", version.ref = "androidxJu
 androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 maplibre-sdk = { module = "org.maplibre.gl:android-sdk", version.ref = "maplibre" }
+androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
+hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltWork" }
+hilt-work-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltWork" }
 truth = { module = "com.google.truth:truth", version.ref = "truth" }
 
 [plugins]

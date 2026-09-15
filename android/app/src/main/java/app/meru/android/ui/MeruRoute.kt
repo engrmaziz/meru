@@ -9,6 +9,18 @@ sealed class MeruRoute(val path: String) {
     data object Garage : MeruRoute("garage")
     data object More : MeruRoute("more")
     data object Calibration : MeruRoute("calibration")
+
+    data object TripProcessing : MeruRoute("trip_processing/{tripId}") {
+        fun create(tripId: String) = "trip_processing/$tripId"
+    }
+
+    data object TripSummary : MeruRoute("trip_summary/{tripId}") {
+        fun create(tripId: String) = "trip_summary/$tripId"
+    }
+
+    data object TripDetail : MeruRoute("trip_detail/{tripId}") {
+        fun create(tripId: String) = "trip_detail/$tripId"
+    }
 }
 
 val mainTabs = listOf(

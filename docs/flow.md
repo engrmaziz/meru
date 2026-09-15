@@ -49,11 +49,11 @@ Home / Drive Ready
  → Live UI (Minimal|Detailed|Performance|HUD)  [SAFE / LOW DISTRACTION]
  → END DRIVE (confirm)
  → Local persist trip
- → Process (route, events, metrics, provisional score)
- → Trip Summary → Timeline / Graph / Replay
- → Sync when online (idempotent client_trip_id)
- → Server: integrity → final metrics → (later) XP/score
- → Home stats update
+ → TripProcessor (events, elevation, geohash cells, provisional quality + XP)
+ → Processing screen → Trip Summary (score count-up) → Detail (timeline / graphs / map replay)
+ → WorkManager sync → POST /v1/trips (idempotent clientTripId) when online
+ → Server: store + integrity stub → (later Phase 5) XP/score authority
+ → Home stats update from local completed trips
 ```
 
 ### Mid-drive safety lock

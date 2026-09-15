@@ -66,3 +66,17 @@
 - **Tests:** MotionMathTest
 - **Strix:** skipped
 - **Follow-ups:** Phase 4 trip summary / replay / sync
+
+### 2026-09-15 — Phase 4 Afterglow trip experience + sync
+- **Band / slice:** Phase 4 / Afterglow
+- **Agent:** Cursor agent (commits as engrmaziz only)
+- **Ponytail rung used:** platform (WorkManager) + minimum (in-memory trip upsert) + YAGNI (single POST vs batch APIs)
+- **Context7 libs:** n/a
+- **Stitch screens:** Compose Processing / Summary / Detail hand-built (Meru tokens, post-drive juice)
+- **DEC referenced:** DEC-015, DEC-019, DEC-020
+- **What shipped:** TripProcessor + geohash exploration; Processing→Summary→Detail (timeline, graphs, replay); Home stats; TripSyncWorker; Nest `POST /v1/trips` idempotent ingest
+- **What deferred (ponytail:):** Postgres trip tables; multipart location batches; server-final integrity worker; seasonal XP
+- **Gamify/motion added:** Summary score count-up, XP bar, new-cells toast (post-drive only)
+- **Tests:** GeoHashTest; TripsService unit; e2e trip upsert dedupe
+- **Strix:** skipped
+- **Follow-ups:** Phase 5 Engine of Want (server XP/achievements)

@@ -35,12 +35,13 @@ AuthZ: users cannot patch others; public profile respects privacy.
 ## B.3 Trips & telemetry
 | Method | Path | Notes |
 |--------|------|-------|
-| POST | `/trips` | create shell `{vehicle_id?, client_trip_id}` idempotent |
-| POST | `/trips/{id}/locations:batch` | gzip optional; max N points |
-| POST | `/trips/{id}/events:batch` | |
-| POST | `/trips/{id}/complete` | triggers `trip.process` |
-| GET | `/trips/{id}` | owner only |
-| GET | `/trips` | paginated |
+| POST | `/trips` | **Phase 4 (DEC-020):** monolithic upsert `{clientTripId, metrics, locations[], events[]}` — idempotent per user |
+| POST | `/trips` | *(later)* create shell `{vehicle_id?, client_trip_id}` only |
+| POST | `/trips/{id}/locations:batch` | gzip optional; max N points — deferred |
+| POST | `/trips/{id}/events:batch` | deferred |
+| POST | `/trips/{id}/complete` | triggers `trip.process` — deferred (client already processed locally) |
+| GET | `/trips/{id}` | owner only — deferred |
+| GET | `/trips` | paginated — deferred |
 | DELETE | `/trips/{id}` | soft; removes from boards if policy |
 
 Worker `trip.process`:

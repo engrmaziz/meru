@@ -1,0 +1,63 @@
+package app.meru.android.engine.sync
+
+import android.content.Context
+import androidx.hilt.work.HiltWorker
+import androidx.work.CoroutineWorker
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkerParameters
+import app.meru.android.core.database.PendingSyncDao
+import app.meru.android.core.database.TripDao
+import app.meru.android.core.datastore.SessionStore
+import app.meru.android.core.network.MeruApi
+import app.meru.android.core.network.TripUpsertRequest
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
+import kotlinx.coroutines.flow.first
+import kotlinx.serialization.json.Json
+
+@HiltWorker
+class TripSyncWorker @AssistedInject constructor(
+    @Assisted context: Context,
+    @Assisted params: WorkerParameters,
+    private val pendingSyncDao: PendingSyncDao,
+    private val tripDao: TripDao,
+    private val api: MeruApi,
+    private val sessionStore: SessionStore,
+    private val json: Json,
+) : CoroutineWorker(context, params) {
+
+    override suspend fun doWork(): Result {
+        val token = sessionStore.session.first().accessToken ?: return Result.retry()
+        val pending = pendingSyncDao.pending().filter { it.type == "trip_complete" }
+        if (pending.isEmpty()) return Result.success()
+
+        var failures = 0
+        for (item in pending) {
+            runCatching {
+                val body = json.decodeFromString(TripUpsertRequest.serializer(), item.payloadJson)
+                api.upsertTrip("Bearer $token", body)
+                tripDao.updateSyncStatus(item.id, "synced")
+                pendingSyncDao.mark(item.id, "synced")
+            }.onFailure {
+                failures++
+                tripDao.updateSyncStatus(item.id, "failed")
+            }
+        }
+        return if (failures == 0) Result.success() else Result.retry()
+    }
+
+    companion object {
+        private const val UNIQUE = "meru_trip_sync"
+
+        fun enqueue(context: Context) {
+            val req = OneTimeWorkRequestBuilder<TripSyncWorker>().build()
+            WorkManager.getInstance(context).enqueueUniqueWork(
+                UNIQUE,
+                ExistingWorkPolicy.KEEP,
+                req,
+            )
+        }
+    }
+}

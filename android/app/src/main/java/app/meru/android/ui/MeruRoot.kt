@@ -26,10 +26,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import app.meru.android.core.datastore.SessionStore
 import app.meru.android.core.designsystem.theme.MeruMuted
 import app.meru.android.core.designsystem.theme.MeruPanel
@@ -42,6 +44,9 @@ import app.meru.android.feature.drive.DriveReadyScreen
 import app.meru.android.feature.garage.GarageStubScreen
 import app.meru.android.feature.home.HomeScreen
 import app.meru.android.feature.more.MoreScreen
+import app.meru.android.feature.trips.TripDetailScreen
+import app.meru.android.feature.trips.TripProcessingScreen
+import app.meru.android.feature.trips.TripSummaryScreen
 import app.meru.android.feature.trips.TripsListScreen
 import app.meru.android.feature.welcome.WelcomeScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -106,59 +111,62 @@ private fun MainGraph(rootViewModel: RootViewModel) {
     val backStack by navController.currentBackStackEntryAsState()
     val current = backStack?.destination?.route
     val driving by rootViewModel.driving.collectAsState()
+    val hideBottomBar = current?.startsWith("trip_") == true || current == MeruRoute.Calibration.path
 
     Scaffold(
         containerColor = MeruVoid,
         bottomBar = {
-            NavigationBar(containerColor = MeruPanel) {
-                mainTabs.forEach { route ->
-                    val selected = current == route.path
-                    val locked = driving && route == MeruRoute.More
-                    NavigationBarItem(
-                        selected = selected,
-                        enabled = !locked,
-                        onClick = {
-                            navController.navigate(route.path) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+            if (!hideBottomBar) {
+                NavigationBar(containerColor = MeruPanel) {
+                    mainTabs.forEach { route ->
+                        val selected = current == route.path
+                        val locked = driving && route == MeruRoute.More
+                        NavigationBarItem(
+                            selected = selected,
+                            enabled = !locked,
+                            onClick = {
+                                navController.navigate(route.path) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = when (route) {
-                                    MeruRoute.Home -> Icons.Outlined.Home
-                                    MeruRoute.Drive -> Icons.Outlined.DirectionsCar
-                                    MeruRoute.Trips -> Icons.Outlined.Route
-                                    MeruRoute.Garage -> Icons.Outlined.Garage
-                                    else -> Icons.Outlined.MoreHoriz
-                                },
-                                contentDescription = route.path,
-                            )
-                        },
-                        label = {
-                            Text(
-                                text = when (route) {
-                                    MeruRoute.Home -> "Home"
-                                    MeruRoute.Drive -> "Drive"
-                                    MeruRoute.Trips -> "Trips"
-                                    MeruRoute.Garage -> "Garage"
-                                    else -> if (locked) "Locked" else "More"
-                                },
-                            )
-                        },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = MeruTeal,
-                            selectedTextColor = MeruTeal,
-                            unselectedIconColor = MeruMuted,
-                            unselectedTextColor = MeruMuted,
-                            disabledIconColor = MeruMuted.copy(alpha = 0.4f),
-                            disabledTextColor = MeruMuted.copy(alpha = 0.4f),
-                            indicatorColor = MeruVoid,
-                        ),
-                    )
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = when (route) {
+                                        MeruRoute.Home -> Icons.Outlined.Home
+                                        MeruRoute.Drive -> Icons.Outlined.DirectionsCar
+                                        MeruRoute.Trips -> Icons.Outlined.Route
+                                        MeruRoute.Garage -> Icons.Outlined.Garage
+                                        else -> Icons.Outlined.MoreHoriz
+                                    },
+                                    contentDescription = route.path,
+                                )
+                            },
+                            label = {
+                                Text(
+                                    text = when (route) {
+                                        MeruRoute.Home -> "Home"
+                                        MeruRoute.Drive -> "Drive"
+                                        MeruRoute.Trips -> "Trips"
+                                        MeruRoute.Garage -> "Garage"
+                                        else -> if (locked) "Locked" else "More"
+                                    },
+                                )
+                            },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MeruTeal,
+                                selectedTextColor = MeruTeal,
+                                unselectedIconColor = MeruMuted,
+                                unselectedTextColor = MeruMuted,
+                                disabledIconColor = MeruMuted.copy(alpha = 0.4f),
+                                disabledTextColor = MeruMuted.copy(alpha = 0.4f),
+                                indicatorColor = MeruVoid,
+                            ),
+                        )
+                    }
                 }
             }
         },
@@ -172,9 +180,16 @@ private fun MainGraph(rootViewModel: RootViewModel) {
             composable(MeruRoute.Drive.path) {
                 DriveReadyScreen(
                     onOpenCalibration = { navController.navigate(MeruRoute.Calibration.path) },
+                    onTripEnded = { tripId ->
+                        navController.navigate(MeruRoute.TripProcessing.create(tripId))
+                    },
                 )
             }
-            composable(MeruRoute.Trips.path) { TripsListScreen() }
+            composable(MeruRoute.Trips.path) {
+                TripsListScreen(
+                    onOpenTrip = { id -> navController.navigate(MeruRoute.TripDetail.create(id)) },
+                )
+            }
             composable(MeruRoute.Garage.path) { GarageStubScreen() }
             composable(MeruRoute.More.path) {
                 MoreScreen(
@@ -183,6 +198,40 @@ private fun MainGraph(rootViewModel: RootViewModel) {
             }
             composable(MeruRoute.Calibration.path) {
                 CalibrationScreen(onBack = { navController.popBackStack() })
+            }
+            composable(
+                route = MeruRoute.TripProcessing.path,
+                arguments = listOf(navArgument("tripId") { type = NavType.StringType }),
+            ) { entry ->
+                val tripId = entry.arguments?.getString("tripId") ?: return@composable
+                TripProcessingScreen(
+                    tripId = tripId,
+                    onReady = { id ->
+                        navController.navigate(MeruRoute.TripSummary.create(id)) {
+                            popUpTo(MeruRoute.Drive.path) { inclusive = false }
+                        }
+                    },
+                )
+            }
+            composable(
+                route = MeruRoute.TripSummary.path,
+                arguments = listOf(navArgument("tripId") { type = NavType.StringType }),
+            ) {
+                TripSummaryScreen(
+                    onOpenDetail = { id -> navController.navigate(MeruRoute.TripDetail.create(id)) },
+                    onDone = {
+                        navController.navigate(MeruRoute.Drive.path) {
+                            popUpTo(MeruRoute.Home.path) { inclusive = false }
+                            launchSingleTop = true
+                        }
+                    },
+                )
+            }
+            composable(
+                route = MeruRoute.TripDetail.path,
+                arguments = listOf(navArgument("tripId") { type = NavType.StringType }),
+            ) {
+                TripDetailScreen(onBack = { navController.popBackStack() })
             }
         }
     }

@@ -56,6 +56,7 @@ private val modes = listOf("Minimal", "Detailed", "Performance", "HUD")
 fun DriveReadyScreen(
     viewModel: DriveViewModel = hiltViewModel(),
     onOpenCalibration: () -> Unit = {},
+    onTripEnded: (String) -> Unit = {},
 ) {
     val telemetry by viewModel.telemetry.collectAsState()
     val motion by viewModel.motion.collectAsState()
@@ -73,6 +74,9 @@ fun DriveReadyScreen(
     ) { viewModel.refreshPermissions() }
 
     LaunchedEffect(Unit) { viewModel.refreshPermissions() }
+    LaunchedEffect(Unit) {
+        viewModel.openProcessing.collect { tripId -> onTripEnded(tripId) }
+    }
 
     if (ui.confirmEnd) {
         AlertDialog(
@@ -179,22 +183,19 @@ fun DriveReadyScreen(
                 OverlayBanner("Location permission lost — open settings", MeruDanger)
             }
             ui.error?.let { OverlayBanner(it, MeruDanger) }
-            ui.lastCompleted?.let { trip ->
-                Text(
-                    "Saved ${trip.id.take(8)} · ${"%.2f".format(trip.distanceM / 1000)} km",
-                    color = MeruTeal,
-                    fontSize = 13.sp,
-                )
-            }
 
             Spacer(modifier = Modifier.height(8.dp))
             if (telemetry.active) {
-                MeruPrimaryButton(text = "End drive", onClick = viewModel::requestEndConfirm)
+                MeruPrimaryButton(
+                    text = if (ui.ending) "Sealing…" else "End drive",
+                    onClick = viewModel::requestEndConfirm,
+                    enabled = !ui.ending,
+                )
             } else {
                 MeruPrimaryButton(
                     text = "Start drive",
                     onClick = viewModel::startDrive,
-                    enabled = !ui.needsLocationPermission,
+                    enabled = !ui.needsLocationPermission && !ui.ending,
                 )
             }
             Spacer(modifier = Modifier.height(24.dp))
