@@ -1,0 +1,26 @@
+# Local / secrets
+.cursor/mcp.json
+.env
+.env.*
+!.env.example
+**/google-services.json
+**/local.properties
+*.jks
+*.keystore
+
+# Android / Node common
+**/build/
+**/.gradle/
+**/node_modules/
+**/dist/
+android/.idea/
+android/*.iml
+android/captures/
+android/.cxx/
+
+# Strix / scans
+strix_runs/
+
+# OS
+.DS_Store
+Thumbs.db

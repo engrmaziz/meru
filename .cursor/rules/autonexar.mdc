@@ -1,0 +1,15 @@
+---
+description: AutoNexar product + docs discipline for all agents in this repo.
+globs:
+alwaysApply: true
+---
+
+# Meru project rule
+
+- Product name: **Meru** (DEC-016). Build only via `plan/N.md` when user says `start phase N`.
+- Source of truth: `docs/decisions.md`, `docs/flow.md`, `docs/brainstorm.md`, `docs/AI-AGENT-BUILD-BIBLE.md`, `plan/`.
+- Do not start implementing until the user explicitly says `start phase N`.
+- When building: log in `docs/BUILD-LOG.md`; promote new choices into `decisions.md`.
+- UI: Stitch MCP → Compose; theme from ANNEX-E; anti-slop (no purple AI defaults).
+- Drive Mode: no leaderboards/social/marketplace while session active.
+- Scores/ranks/invoices/certified vault writes: server authority.

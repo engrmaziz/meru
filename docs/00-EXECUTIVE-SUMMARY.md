@@ -1,0 +1,7 @@
+# AutoNexar — Executive Summary (150–200 words)
+
+**Meru** is an Android-first smart driving companion that turns every drive into an ascent—an adventure—while keeping the road experience safe and minimal. Stage 1 builds the telemetry engine: live speed, GPS route, sensors, trip processing, scores, graphs, and offline sync. Stage 2 adds gamification—XP, achievements, challenges, exploration maps, four-level seasonal leaderboards, social profiles, anti-cheat, and server-side scoring. Stage 3 creates a Digital Vehicle Vault: complete car history, documents, services, parts, costs, and one-tap timelines (one free car; extra cars paid). Stage 4 opens a workshop marketplace: brand-specialist and general mechanics list services/parts, expose slots, book jobs, read shared history, issue itemized bills, and write certified service entries back into the vault.
+
+**Attraction loop:** Drive → discover → score → rank → maintain car → book trusted service → drive again. Differentiate with adventure visuals, responsible-driving scores (not raw speed), city→global seasons, and a lifetime car record linked to real workshops.
+
+**Build order for agents:** Stitch MCP → Compose (anti-slop theme); Ponytail for minimal code; Context7 for library docs; NestJS + Postgres + Redis on cheap/free-tier hosting; MapLibre-first; workshop web before native; QA = unit/UI/car/E2E + Strix security subset. Max gamify post-drive surfaces; calm Drive Mode. Living logs: `decisions.md`, `flow.md`, `brainstorm.md`, `BUILD-LOG.md`. Full spec: `AI-AGENT-BUILD-BIBLE.md`.

@@ -1,0 +1,20 @@
+---
+description: Git commits and pushes must be authored only as engrmaziz — never Cursor.
+globs:
+alwaysApply: true
+---
+
+# Git identity — engrmaziz only
+
+When committing or pushing for Meru / this repo:
+
+1. **Author must be** GitHub user **engrmaziz** only.
+   - `user.name`: `Musharraf Aziz` (or `engrmaziz` if name unavailable)
+   - `user.email`: `io@maziz.me` (GitHub account email for engrmaziz)
+2. **Never** add `Co-authored-by: Cursor` or any Cursor/agent co-author trailer.
+3. **Never** let commit attribution show Cursor, Copilot, or any AI tool as contributor on GitHub.
+4. Prefer per-commit author flags or **local** repo config only:
+   `git -c user.name="Musharraf Aziz" -c user.email="io@maziz.me" commit ...`
+5. Do not change the user's **global** git config unless they explicitly ask.
+
+This is a hard product/process rule from the repo owner.

@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: meru-postgres
+    environment:
+      POSTGRES_USER: meru
+      POSTGRES_PASSWORD: meru
+      POSTGRES_DB: meru
+    ports:
+      - "5432:5432"
+    volumes:
+      - meru_pg:/var/lib/postgresql/data
+    # Phase 1 API uses in-memory auth; Postgres is ready for Phase 2+.
+
+  redis:
+    image: redis:7-alpine
+    container_name: meru-redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  meru_pg:
