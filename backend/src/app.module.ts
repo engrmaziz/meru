@@ -7,6 +7,7 @@ import { HealthController } from './health.controller';
 import { ProgressionController } from './progression.controller';
 import { ProgressionService } from './progression.service';
 import { TripsController, TripsService } from './trips.controller';
+import { VaultController, VaultService } from './vault.controller';
 
 @Module({
   imports: [],
@@ -16,7 +17,14 @@ import { TripsController, TripsService } from './trips.controller';
     TripsController,
     ProgressionController,
     ArenaController,
+    VaultController,
   ],
-  providers: [AuthService, TripsService, ProgressionService, ArenaService],
+  providers: [
+    AuthService,
+    TripsService,
+    ProgressionService,
+    ArenaService,
+    VaultService,
+  ],
 })
 export class AppModule {}

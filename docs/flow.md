@@ -93,12 +93,11 @@ Season starts → fresh seasonal ranks
 
 ```
 Garage → Add vehicle (slot check / paywall)
- → Identity + ownership events + docs
+ → Identity + ownership events + docs (signed URL stub)
  → One-tap Timeline (services + ownership + docs + linked trips)
- → Manual service log (offline OK → sync)
- → Maintenance due engine → reminders
- → Export PDF (sell/share)
- → History share token (for S4)
+ → Manual service log (offline OK → WorkManager sync)
+ → Maintenance due + history share token (Phase 8)
+ → Extra slot via Play verify stub
 ```
 
 ### Monetization microflow

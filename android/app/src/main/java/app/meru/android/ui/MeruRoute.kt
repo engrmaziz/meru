@@ -27,6 +27,15 @@ sealed class MeruRoute(val path: String) {
     data object Leaderboards : MeruRoute("leaderboards")
     data object AdventureMap : MeruRoute("adventure_map")
     data object ShareCard : MeruRoute("share_card")
+
+    data object AddVehicle : MeruRoute("add_vehicle")
+    data object VehiclePaywall : MeruRoute("vehicle_paywall")
+    data object VehicleTimeline : MeruRoute("vehicle_timeline/{vehicleId}") {
+        fun create(vehicleId: String) = "vehicle_timeline/$vehicleId"
+    }
+    data object AddService : MeruRoute("add_service/{vehicleId}") {
+        fun create(vehicleId: String) = "add_service/$vehicleId"
+    }
 }
 
 val mainTabs = listOf(

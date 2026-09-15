@@ -13,6 +13,13 @@
 
 ---
 
+## DEC-023 — Phase 7 vault entitlement + share primitive
+- **Date:** 2026-09-15
+- **Status:** Accepted
+- **Decision:** `maxVehicles` defaults to 1 (DEC-010). Extra slots via `POST /v1/billing/play/verify` (stub accept in Phase 7). Timeline is server merge of ownership/docs/services; client appends linked trips. History shares are opaque tokens with TTL for Phase 8 workshops. Document “upload” is signed-URL stub + confirm.
+- **Why:** Unblocks garage UX and Phase 8 share contract without infra spend.
+- **Consequences:** Replace Play stub before production; store vehicles in Postgres.
+
 ## DEC-022 — Phase 6 Arena boards (pilot Lahore)
 - **Date:** 2026-09-15
 - **Status:** Accepted

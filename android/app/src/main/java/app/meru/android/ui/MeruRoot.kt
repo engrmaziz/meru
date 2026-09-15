@@ -51,7 +51,11 @@ import app.meru.android.feature.arena.ShareCardScreen
 import app.meru.android.feature.auth.AuthScreen
 import app.meru.android.feature.calibration.CalibrationScreen
 import app.meru.android.feature.drive.DriveReadyScreen
-import app.meru.android.feature.garage.GarageStubScreen
+import app.meru.android.feature.garage.AddServiceScreen
+import app.meru.android.feature.garage.AddVehicleScreen
+import app.meru.android.feature.garage.GarageListScreen
+import app.meru.android.feature.garage.VehiclePaywallScreen
+import app.meru.android.feature.garage.VehicleTimelineScreen
 import app.meru.android.feature.home.HomeScreen
 import app.meru.android.feature.more.MoreScreen
 import app.meru.android.feature.progression.AchievementsScreen
@@ -129,7 +133,11 @@ private fun MainGraph(rootViewModel: RootViewModel) {
         current == MeruRoute.Challenges.path ||
         current == MeruRoute.Leaderboards.path ||
         current == MeruRoute.AdventureMap.path ||
-        current == MeruRoute.ShareCard.path
+        current == MeruRoute.ShareCard.path ||
+        current == MeruRoute.AddVehicle.path ||
+        current == MeruRoute.VehiclePaywall.path ||
+        current?.startsWith("vehicle_timeline") == true ||
+        current?.startsWith("add_service") == true
 
     Scaffold(
         containerColor = MeruVoid,
@@ -220,7 +228,13 @@ private fun MainGraph(rootViewModel: RootViewModel) {
                     onOpenTrip = { id -> navController.navigate(MeruRoute.TripDetail.create(id)) },
                 )
             }
-            composable(MeruRoute.Garage.path) { GarageStubScreen() }
+            composable(MeruRoute.Garage.path) {
+                GarageListScreen(
+                    onOpenVehicle = { id -> navController.navigate(MeruRoute.VehicleTimeline.create(id)) },
+                    onAddVehicle = { navController.navigate(MeruRoute.AddVehicle.path) },
+                    onPaywall = { navController.navigate(MeruRoute.VehiclePaywall.path) },
+                )
+            }
             composable(MeruRoute.More.path) {
                 MoreScreen(
                     onOpenCalibration = { navController.navigate(MeruRoute.Calibration.path) },
@@ -264,6 +278,47 @@ private fun MainGraph(rootViewModel: RootViewModel) {
             }
             composable(MeruRoute.ShareCard.path) {
                 ShareCardScreen(onBack = { navController.popBackStack() })
+            }
+            composable(MeruRoute.AddVehicle.path) {
+                AddVehicleScreen(
+                    onBack = { navController.popBackStack() },
+                    onNeedPaywall = {
+                        navController.navigate(MeruRoute.VehiclePaywall.path) {
+                            popUpTo(MeruRoute.Garage.path)
+                        }
+                    },
+                    onCreated = { id ->
+                        navController.navigate(MeruRoute.VehicleTimeline.create(id)) {
+                            popUpTo(MeruRoute.Garage.path)
+                        }
+                    },
+                )
+            }
+            composable(MeruRoute.VehiclePaywall.path) {
+                VehiclePaywallScreen(
+                    onBack = { navController.popBackStack() },
+                    onPurchased = {
+                        navController.navigate(MeruRoute.AddVehicle.path) {
+                            popUpTo(MeruRoute.Garage.path)
+                        }
+                    },
+                )
+            }
+            composable(
+                route = MeruRoute.VehicleTimeline.path,
+                arguments = listOf(navArgument("vehicleId") { type = NavType.StringType }),
+            ) { entry ->
+                val id = entry.arguments?.getString("vehicleId") ?: return@composable
+                VehicleTimelineScreen(
+                    onBack = { navController.popBackStack() },
+                    onAddService = { navController.navigate(MeruRoute.AddService.create(id)) },
+                )
+            }
+            composable(
+                route = MeruRoute.AddService.path,
+                arguments = listOf(navArgument("vehicleId") { type = NavType.StringType }),
+            ) {
+                AddServiceScreen(onBack = { navController.popBackStack() })
             }
             composable(
                 route = MeruRoute.TripProcessing.path,

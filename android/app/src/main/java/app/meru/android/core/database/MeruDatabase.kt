@@ -149,12 +149,16 @@ interface PendingSyncDao {
         TripEventEntity::class,
         ExploredCellEntity::class,
         PendingSyncEntity::class,
+        VehicleEntity::class,
+        VehicleServiceEntity::class,
+        VehicleDocumentEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = false,
 )
 abstract class MeruDatabase : RoomDatabase() {
     abstract fun tripDao(): TripDao
     abstract fun explorationDao(): ExplorationDao
     abstract fun pendingSyncDao(): PendingSyncDao
+    abstract fun vehicleDao(): VehicleDao
 }

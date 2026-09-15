@@ -112,6 +112,9 @@ fun DriveReadyScreen(
                 fontSize = 26.sp,
                 fontWeight = FontWeight.SemiBold,
             )
+            ui.activeVehicleLabel?.let {
+                Text("Vehicle · $it", color = MeruMuted, fontSize = 13.sp)
+            }
 
             if (ui.needsLocationPermission || ui.needsNotificationPermission) {
                 PermissionCard {

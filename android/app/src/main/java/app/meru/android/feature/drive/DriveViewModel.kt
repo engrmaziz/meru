@@ -7,6 +7,7 @@ import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import app.meru.android.core.database.VehicleDao
 import app.meru.android.engine.drive.DriveForegroundService
 import app.meru.android.engine.drive.DriveSessionController
 import app.meru.android.engine.sensors.CalibrationStore
@@ -38,6 +39,7 @@ data class DriveUiState(
     val confirmEnd: Boolean = false,
     val mapExpanded: Boolean = false,
     val ending: Boolean = false,
+    val activeVehicleLabel: String? = null,
 )
 
 @HiltViewModel
@@ -45,6 +47,7 @@ class DriveViewModel @Inject constructor(
     application: Application,
     private val session: DriveSessionController,
     private val tripProcessor: TripProcessor,
+    private val vehicleDao: VehicleDao,
     motionEngine: MotionEngine,
     calibrationStore: CalibrationStore,
 ) : AndroidViewModel(application) {
@@ -72,6 +75,12 @@ class DriveViewModel @Inject constructor(
                 .collect { calibrated ->
                     _ui.value = _ui.value.copy(calibrated = calibrated)
                 }
+        }
+        viewModelScope.launch {
+            val active = vehicleDao.active()
+            _ui.value = _ui.value.copy(
+                activeVehicleLabel = active?.let { "${it.nickname} · ${it.year}" },
+            )
         }
     }
 
@@ -105,7 +114,8 @@ class DriveViewModel @Inject constructor(
         }
         viewModelScope.launch {
             runCatching {
-                session.startDrive()
+                val vehicleId = vehicleDao.active()?.id
+                session.startDrive(vehicleId)
                 DriveForegroundService.start(getApplication())
             }.onFailure { e ->
                 _ui.value = _ui.value.copy(error = e.message ?: "Could not start drive")

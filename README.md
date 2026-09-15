@@ -18,7 +18,8 @@ Android-first driving adventure — telemetry, ascent ranks, vehicle vault, work
 | 4 | Afterglow | Done — summary, replay, WorkManager sync, trip ingest |
 | 5 | Engine of Want | Done — server XP/scores, achievements, challenges, Home hub |
 | 6 | Arena | Done — seasonal boards, friends, adventure map, privacy |
-| 7–10 | … | Planned — see `plan/` |
+| 7 | Vault | Done — garage, timeline, entitlement, offline services |
+| 8–10 | … | Planned — see `plan/` |
 
 ---
 
@@ -68,6 +69,14 @@ Android-first driving adventure — telemetry, ascent ranks, vehicle vault, work
 - Adventure map city % + geohash glow; privacy-safe share card
 - Leaderboard opt-out; Driving Mode hard-blocks boards/map
 - Ghost quality compare on repeat route; thin `GET/PATCH /v1/admin/flags`
+
+## Phase 7 — Vault
+
+- Garage list + 3-step add-vehicle wizard; one free car (DEC)
+- One-tap timeline (ownership / docs / services / drives merged)
+- Manual service offline → WorkManager sync; document signed-URL stub + confirm
+- Costs summary; history-share token for Phase 8; Play verify unlocks extra slots
+- Active vehicle linked on Start Drive
 
 ---
 

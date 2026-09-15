@@ -9,8 +9,10 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import app.meru.android.core.database.PendingSyncDao
 import app.meru.android.core.database.TripDao
+import app.meru.android.core.database.VehicleDao
 import app.meru.android.core.datastore.ProgressionStore
 import app.meru.android.core.datastore.SessionStore
+import app.meru.android.core.network.CreateServiceRequest
 import app.meru.android.core.network.MeruApi
 import app.meru.android.core.network.TripUpsertRequest
 import dagger.assisted.Assisted
@@ -24,6 +26,7 @@ class TripSyncWorker @AssistedInject constructor(
     @Assisted params: WorkerParameters,
     private val pendingSyncDao: PendingSyncDao,
     private val tripDao: TripDao,
+    private val vehicleDao: VehicleDao,
     private val api: MeruApi,
     private val sessionStore: SessionStore,
     private val progressionStore: ProgressionStore,
@@ -32,10 +35,9 @@ class TripSyncWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         val token = sessionStore.session.first().accessToken ?: return Result.retry()
-        val pending = pendingSyncDao.pending().filter { it.type == "trip_complete" }
-        if (pending.isEmpty()) return Result.success()
-
         var failures = 0
+
+        val pending = pendingSyncDao.pending().filter { it.type == "trip_complete" }
         for (item in pending) {
             runCatching {
                 val body = json.decodeFromString(TripUpsertRequest.serializer(), item.payloadJson)
@@ -44,7 +46,6 @@ class TripSyncWorker @AssistedInject constructor(
                     if (!res.duplicated) {
                         progressionStore.applyAwards(awards, res.ghost?.message)
                     }
-                    // Overlay server quality onto local trip (provisional → final)
                     val trip = tripDao.getTrip(item.id)
                     if (trip != null) {
                         tripDao.upsertTrip(
@@ -67,6 +68,30 @@ class TripSyncWorker @AssistedInject constructor(
                 tripDao.updateSyncStatus(item.id, "failed")
             }
         }
+
+        for (svc in vehicleDao.pendingServices()) {
+            runCatching {
+                api.createService(
+                    "Bearer $token",
+                    svc.vehicleId,
+                    CreateServiceRequest(
+                        clientServiceId = svc.clientServiceId,
+                        atMs = svc.atMs,
+                        odometerKm = svc.odometerKm,
+                        workshopName = svc.workshopName,
+                        serviceTypeIds = listOf("oil_change"),
+                        laborCost = svc.laborCost,
+                        partsCost = svc.partsCost,
+                        nextDueAtMs = svc.nextDueAtMs,
+                    ),
+                )
+                vehicleDao.markService(svc.id, "synced")
+            }.onFailure {
+                failures++
+                vehicleDao.markService(svc.id, "failed")
+            }
+        }
+
         return if (failures == 0) Result.success() else Result.retry()
     }
 

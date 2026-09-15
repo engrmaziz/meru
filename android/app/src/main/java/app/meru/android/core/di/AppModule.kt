@@ -6,6 +6,7 @@ import app.meru.android.core.database.ExplorationDao
 import app.meru.android.core.database.MeruDatabase
 import app.meru.android.core.database.PendingSyncDao
 import app.meru.android.core.database.TripDao
+import app.meru.android.core.database.VehicleDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,4 +32,7 @@ object AppModule {
 
     @Provides
     fun pendingSyncDao(db: MeruDatabase): PendingSyncDao = db.pendingSyncDao()
+
+    @Provides
+    fun vehicleDao(db: MeruDatabase): VehicleDao = db.vehicleDao()
 }

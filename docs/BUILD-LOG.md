@@ -108,3 +108,17 @@
 - **Tests:** ArenaService ranks + opt-out
 - **Strix:** skipped
 - **Follow-ups:** Phase 7 Vault (garage)
+
+### 2026-09-15 — Phase 7 Vault garage & timeline
+- **Band / slice:** Phase 7 / Vault
+- **Agent:** Cursor agent (commits as engrmaziz only)
+- **Ponytail rung used:** YAGNI (in-memory vault + Play verify stub) + platform (Room + WorkManager)
+- **Context7 libs:** n/a
+- **Stitch screens:** Compose Garage / Timeline / Add Vehicle / Paywall hand-built
+- **DEC referenced:** DEC-010 (1 free car), DEC-019, DEC-023
+- **What shipped:** Vehicles CRUD + entitlement; timeline merge; docs upload stub; offline services sync; history share; Drive links active vehicle
+- **What deferred (ponytail:):** Real R2/S3; Google Play Billing Library; certified stamp juice; PDF export
+- **Gamify/motion added:** light (timeline stamps deferred to Phase 9 writeback)
+- **Tests:** VaultService slot gate + timeline idempotent service
+- **Strix:** skipped
+- **Follow-ups:** Phase 8 Bay (workshop discovery/booking)

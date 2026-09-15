@@ -313,6 +313,162 @@ data class SeasonCurrentResponse(
     val primaryPeriod: String = "season",
 )
 
+@Serializable
+data class VehicleDto(
+    val id: String,
+    val make: String,
+    val model: String,
+    val year: Int,
+    val variant: String? = null,
+    val powertrain: String? = null,
+    val nickname: String,
+    val vinMasked: String? = null,
+    val odometerKm: Double = 0.0,
+    val purchaseAtMs: Long? = null,
+    val createdAtMs: Long = 0,
+    val active: Boolean = false,
+)
+
+@Serializable
+data class VehiclesListResponse(
+    val maxVehicles: Int = 1,
+    val vehicles: List<VehicleDto> = emptyList(),
+    val canAdd: Boolean = true,
+)
+
+@Serializable
+data class CreateVehicleRequest(
+    val make: String,
+    val model: String,
+    val year: Int,
+    val variant: String? = null,
+    val powertrain: String? = null,
+    val nickname: String? = null,
+    val vin: String? = null,
+    val odometerKm: Double? = null,
+    val purchaseAtMs: Long? = null,
+)
+
+@Serializable
+data class TimelineItemDto(
+    val id: String,
+    val atMs: Long,
+    val kind: String,
+    val title: String,
+    val subtitle: String? = null,
+)
+
+@Serializable
+data class TimelineSummaryDto(
+    val lifetimeCost: Double = 0.0,
+    val serviceVisits: Int = 0,
+    val documentCount: Int = 0,
+    val nextDueAtMs: Long? = null,
+)
+
+@Serializable
+data class TimelineResponse(
+    val vehicle: VehicleDto,
+    val summary: TimelineSummaryDto = TimelineSummaryDto(),
+    val items: List<TimelineItemDto> = emptyList(),
+)
+
+@Serializable
+data class CreateServiceRequest(
+    val clientServiceId: String,
+    val atMs: Long? = null,
+    val odometerKm: Double? = null,
+    val workshopName: String? = null,
+    val serviceTypeIds: List<String> = emptyList(),
+    val notes: String? = null,
+    val laborCost: Double = 0.0,
+    val partsCost: Double = 0.0,
+    val nextDueAtMs: Long? = null,
+)
+
+@Serializable
+data class ServiceResponseDto(
+    val id: String,
+    val vehicleId: String,
+    val clientServiceId: String,
+    val atMs: Long,
+    val odometerKm: Double = 0.0,
+    val workshopName: String? = null,
+    val laborCost: Double = 0.0,
+    val partsCost: Double = 0.0,
+    val nextDueAtMs: Long? = null,
+    val duplicated: Boolean = false,
+)
+
+@Serializable
+data class DocumentCreateRequest(
+    val type: String = "other",
+    val title: String = "Document",
+    val expiresAtMs: Long? = null,
+)
+
+@Serializable
+data class DocumentCreateResponse(
+    val id: String,
+    val vehicleId: String,
+    val type: String,
+    val title: String,
+    val expiresAtMs: Long? = null,
+    val uploadUrl: String = "",
+    val uploaded: Boolean = false,
+)
+
+@Serializable
+data class HistoryShareRequest(
+    val scope: String = "timeline_readonly",
+    val ttlHours: Int = 24,
+)
+
+@Serializable
+data class HistoryShareResponse(
+    val id: String,
+    val token: String,
+    val scope: String,
+    val expiresAtMs: Long,
+    val redeemHint: String = "",
+)
+
+@Serializable
+data class PlayVerifyRequest(
+    val purchaseToken: String,
+    val sku: String = "meru_extra_vehicle_slot",
+)
+
+@Serializable
+data class EntitlementResponse(
+    val maxVehicles: Int = 1,
+    val verified: Boolean = false,
+)
+
+@Serializable
+data class CostsResponse(
+    val total: Double = 0.0,
+    val byMonth: List<CostMonthDto> = emptyList(),
+)
+
+@Serializable
+data class CostMonthDto(
+    val month: String,
+    val amount: Double = 0.0,
+)
+
+@Serializable
+data class ServiceTypesResponse(
+    val items: List<ServiceTypeDto> = emptyList(),
+)
+
+@Serializable
+data class ServiceTypeDto(
+    val id: String,
+    val label: String,
+    val category: String = "other",
+)
+
 interface MeruApi {
     @GET("health")
     suspend fun health(): HealthResponse
@@ -381,6 +537,67 @@ interface MeruApi {
         @Header("Authorization") authorization: String,
         @Body body: PrivacyPatchRequest,
     ): PrivacyMeResponse
+
+    @GET("v1/service-types")
+    suspend fun serviceTypes(): ServiceTypesResponse
+
+    @GET("v1/vehicles")
+    suspend fun vehicles(@Header("Authorization") authorization: String): VehiclesListResponse
+
+    @POST("v1/vehicles")
+    suspend fun createVehicle(
+        @Header("Authorization") authorization: String,
+        @Body body: CreateVehicleRequest,
+    ): VehicleDto
+
+    @GET("v1/vehicles/{id}/timeline")
+    suspend fun vehicleTimeline(
+        @Header("Authorization") authorization: String,
+        @retrofit2.http.Path("id") id: String,
+    ): TimelineResponse
+
+    @POST("v1/vehicles/{id}/services")
+    suspend fun createService(
+        @Header("Authorization") authorization: String,
+        @retrofit2.http.Path("id") id: String,
+        @Body body: CreateServiceRequest,
+    ): ServiceResponseDto
+
+    @POST("v1/vehicles/{id}/documents")
+    suspend fun createDocument(
+        @Header("Authorization") authorization: String,
+        @retrofit2.http.Path("id") id: String,
+        @Body body: DocumentCreateRequest,
+    ): DocumentCreateResponse
+
+    @POST("v1/vehicles/{id}/documents/{docId}/confirm")
+    suspend fun confirmDocument(
+        @Header("Authorization") authorization: String,
+        @retrofit2.http.Path("id") id: String,
+        @retrofit2.http.Path("docId") docId: String,
+    ): DocumentCreateResponse
+
+    @GET("v1/vehicles/{id}/costs")
+    suspend fun vehicleCosts(
+        @Header("Authorization") authorization: String,
+        @retrofit2.http.Path("id") id: String,
+    ): CostsResponse
+
+    @POST("v1/vehicles/{id}/history-shares")
+    suspend fun createHistoryShare(
+        @Header("Authorization") authorization: String,
+        @retrofit2.http.Path("id") id: String,
+        @Body body: HistoryShareRequest = HistoryShareRequest(),
+    ): HistoryShareResponse
+
+    @POST("v1/billing/play/verify")
+    suspend fun verifyPlayPurchase(
+        @Header("Authorization") authorization: String,
+        @Body body: PlayVerifyRequest,
+    ): EntitlementResponse
+
+    @GET("v1/billing/entitlement")
+    suspend fun entitlement(@Header("Authorization") authorization: String): EntitlementResponse
 }
 
 @Module

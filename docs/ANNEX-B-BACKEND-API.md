@@ -80,14 +80,19 @@ Worker `trip.process`:
 ## B.6 Garage
 | Method | Path | Notes |
 |--------|------|-------|
-| GET/POST | `/vehicles` | enforce max vehicles entitlement |
+| GET/POST | `/vehicles` | **Phase 7:** enforce max vehicles entitlement |
 | GET/PATCH/DELETE | `/vehicles/{id}` | owner |
 | POST | `/vehicles/{id}/ownership-events` | |
-| POST | `/vehicles/{id}/documents` | returns upload URL |
+| POST | `/vehicles/{id}/documents` | returns upload URL stub |
+| POST | `/vehicles/{id}/documents/{docId}/confirm` | marks uploaded |
 | GET | `/vehicles/{id}/timeline` | merged feed |
-| POST | `/vehicles/{id}/services` | manual |
+| GET | `/vehicles/{id}/costs` | simple totals |
+| POST | `/vehicles/{id}/services` | manual; idempotent `clientServiceId` |
 | GET | `/service-types` | taxonomy |
 | POST | `/vehicles/{id}/history-shares` | workshop + scope + TTL |
+| GET | `/maintenance/due` | reminders |
+| GET | `/billing/entitlement` | maxVehicles |
+| POST | `/billing/play/verify` | stub increments slot |
 | POST | `/billing/play/verify` | extra slot SKU |
 
 ---
