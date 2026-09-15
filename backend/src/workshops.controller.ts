@@ -87,7 +87,7 @@ export class WorkshopsService {
   private readonly slotById = new Map<string, Slot>();
   private readonly holds = new Map<string, Hold>(); // slotId → hold
   private readonly bookings = new Map<string, Booking>();
-  private readonly notifications = new Map<string, Notif[]>();
+  private readonly notifByUser = new Map<string, Notif[]>();
 
   constructor(
     private readonly vault: VaultService,
@@ -340,7 +340,7 @@ export class WorkshopsService {
   }
 
   notifications(userId: string) {
-    return { items: this.notifications.get(userId) ?? [] };
+    return { items: this.notifByUser.get(userId) ?? [] };
   }
 
   /** Called by JobsService */
@@ -417,7 +417,7 @@ export class WorkshopsService {
     userId: string,
     partial: { type: string; title: string; body: string },
   ) {
-    const list = this.notifications.get(userId) ?? [];
+    const list = this.notifByUser.get(userId) ?? [];
     list.unshift({
       id: randomUUID(),
       userId,
@@ -425,7 +425,7 @@ export class WorkshopsService {
       atMs: Date.now(),
       read: false,
     });
-    this.notifications.set(userId, list.slice(0, 50));
+    this.notifByUser.set(userId, list.slice(0, 50));
   }
 
   private publicWorkshop(w: Workshop) {
