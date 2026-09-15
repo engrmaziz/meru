@@ -7,43 +7,9 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-
-export type TripLocationDto = {
-  ts: number;
-  lat: number;
-  lon: number;
-  alt?: number | null;
-  speed?: number | null;
-  bearing?: number | null;
-  acc?: number | null;
-};
-
-export type TripEventDto = {
-  ts: number;
-  type: string;
-  label: string;
-  severity?: number;
-  lat?: number | null;
-  lon?: number | null;
-};
-
-export type TripUpsertBody = {
-  clientTripId: string;
-  startAtMs: number;
-  endAtMs?: number | null;
-  distanceM?: number;
-  durationMs?: number;
-  avgSpeedKmh?: number;
-  maxSpeedKmh?: number;
-  qualityScore?: number;
-  explorationXp?: number;
-  newCells?: number;
-  elevationGainM?: number;
-  stopCount?: number;
-  pointCount?: number;
-  locations?: TripLocationDto[];
-  events?: TripEventDto[];
-};
+import { parseBearerUserId } from './auth.util';
+import { ProgressionService } from './progression.service';
+import type { TripUpsertBody } from './trips.types';
 
 type StoredTrip = TripUpsertBody & {
   id: string;
@@ -54,21 +20,36 @@ type StoredTrip = TripUpsertBody & {
 
 @Injectable()
 export class TripsService {
-  // ponytail: in-memory trip store for Phase 4; ceiling = lost on restart. Upgrade: Postgres trips.
+  // ponytail: in-memory trip store; ceiling = lost on restart. Upgrade: Postgres trips.
   private readonly byClientId = new Map<string, StoredTrip>();
+
+  constructor(private readonly progression: ProgressionService) {}
 
   upsert(userId: string, body: TripUpsertBody) {
     const key = `${userId}:${body.clientTripId}`;
     const existing = this.byClientId.get(key);
     if (existing) {
+      const prior = this.progression.getOrCreate(userId).lastTripAwards;
       return {
         id: existing.id,
         clientTripId: existing.clientTripId,
         integrity: existing.integrity,
         duplicated: true,
+        awards:
+          prior?.clientTripId === existing.clientTripId
+            ? prior
+            : this.progression.me(userId).lastTripAwards,
       };
     }
-    const integrity = Math.min(99, Math.max(70, (body.qualityScore ?? 80) + 2));
+
+    // Integrity from telemetry trust signals — not client qualityScore alone
+    const pointCount = body.pointCount ?? body.locations?.length ?? 0;
+    let integrity = 88;
+    if (pointCount < 5) integrity -= 12;
+    if ((body.distanceM ?? 0) < 100) integrity -= 8;
+    if ((body.events ?? []).filter((e) => e.type === 'BRAKING').length > 8) integrity -= 5;
+    integrity = Math.max(55, Math.min(99, integrity));
+
     const stored: StoredTrip = {
       ...body,
       id: randomUUID(),
@@ -79,11 +60,14 @@ export class TripsService {
       events: body.events ?? [],
     };
     this.byClientId.set(key, stored);
+
+    const awards = this.progression.finalizeTrip(userId, stored.id, body, integrity);
     return {
       id: stored.id,
       clientTripId: stored.clientTripId,
       integrity: stored.integrity,
       duplicated: false,
+      awards,
     };
   }
 
@@ -112,13 +96,4 @@ export class TripsController {
     }
     return this.trips.upsert(userId, body);
   }
-}
-
-/** Tokens are `meru_<userId>_<uuid>` from AuthService. */
-export function parseBearerUserId(authorization?: string): string | null {
-  if (!authorization?.startsWith('Bearer ')) return null;
-  const token = authorization.slice('Bearer '.length).trim();
-  const parts = token.split('_');
-  if (parts.length < 3 || parts[0] !== 'meru') return null;
-  return parts[1] || null;
 }

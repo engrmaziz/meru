@@ -44,6 +44,8 @@ import app.meru.android.feature.drive.DriveReadyScreen
 import app.meru.android.feature.garage.GarageStubScreen
 import app.meru.android.feature.home.HomeScreen
 import app.meru.android.feature.more.MoreScreen
+import app.meru.android.feature.progression.AchievementsScreen
+import app.meru.android.feature.progression.ChallengesScreen
 import app.meru.android.feature.trips.TripDetailScreen
 import app.meru.android.feature.trips.TripProcessingScreen
 import app.meru.android.feature.trips.TripSummaryScreen
@@ -111,7 +113,10 @@ private fun MainGraph(rootViewModel: RootViewModel) {
     val backStack by navController.currentBackStackEntryAsState()
     val current = backStack?.destination?.route
     val driving by rootViewModel.driving.collectAsState()
-    val hideBottomBar = current?.startsWith("trip_") == true || current == MeruRoute.Calibration.path
+    val hideBottomBar = current?.startsWith("trip_") == true ||
+        current == MeruRoute.Calibration.path ||
+        current == MeruRoute.Achievements.path ||
+        current == MeruRoute.Challenges.path
 
     Scaffold(
         containerColor = MeruVoid,
@@ -176,7 +181,12 @@ private fun MainGraph(rootViewModel: RootViewModel) {
             startDestination = MeruRoute.Home.path,
             modifier = Modifier.padding(padding),
         ) {
-            composable(MeruRoute.Home.path) { HomeScreen() }
+            composable(MeruRoute.Home.path) {
+                HomeScreen(
+                    onOpenAchievements = { navController.navigate(MeruRoute.Achievements.path) },
+                    onOpenChallenges = { navController.navigate(MeruRoute.Challenges.path) },
+                )
+            }
             composable(MeruRoute.Drive.path) {
                 DriveReadyScreen(
                     onOpenCalibration = { navController.navigate(MeruRoute.Calibration.path) },
@@ -194,10 +204,18 @@ private fun MainGraph(rootViewModel: RootViewModel) {
             composable(MeruRoute.More.path) {
                 MoreScreen(
                     onOpenCalibration = { navController.navigate(MeruRoute.Calibration.path) },
+                    onOpenAchievements = { navController.navigate(MeruRoute.Achievements.path) },
+                    onOpenChallenges = { navController.navigate(MeruRoute.Challenges.path) },
                 )
             }
             composable(MeruRoute.Calibration.path) {
                 CalibrationScreen(onBack = { navController.popBackStack() })
+            }
+            composable(MeruRoute.Achievements.path) {
+                AchievementsScreen(onBack = { navController.popBackStack() })
+            }
+            composable(MeruRoute.Challenges.path) {
+                ChallengesScreen(onBack = { navController.popBackStack() })
             }
             composable(
                 route = MeruRoute.TripProcessing.path,

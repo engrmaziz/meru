@@ -52,8 +52,9 @@ Home / Drive Ready
  → TripProcessor (events, elevation, geohash cells, provisional quality + XP)
  → Processing screen → Trip Summary (score count-up) → Detail (timeline / graphs / map replay)
  → WorkManager sync → POST /v1/trips (idempotent clientTripId) when online
- → Server: store + integrity stub → (later Phase 5) XP/score authority
- → Home stats update from local completed trips
+ → Server ProgressionService: integrity + Quality/Exploration/Activity + XP/achievements/challenges
+ → Client Summary shows provisional then overlays awards; Home refreshes scores/me
+ → Home hub: XP bar, Adventure vs Driver Rating, streak, next challenge
 ```
 
 ### Mid-drive safety lock

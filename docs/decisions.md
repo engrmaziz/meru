@@ -13,6 +13,13 @@
 
 ---
 
+## DEC-021 — Phase 5 server progression on trip finalize
+- **Date:** 2026-09-15
+- **Status:** Accepted
+- **Decision:** Competitive Quality / Exploration / Activity, Adventure Score, Driver Rating, XP, achievements, and challenge ticks are computed in `ProgressionService` when `POST /v1/trips` first succeeds. Client provisional values are UX-only; spoofed `qualityScore`/`explorationXp` do not raise awards. Weights served via `GET /v1/scores/config` (versioned). Integrity below threshold sets `competitiveEligible=false` (boards Phase 6).
+- **Why:** DEC server authority + Phase 5 exit criteria (S2-01).
+- **Consequences:** In-memory until Postgres `xp_ledger` / `user_scores`; Home caches via `ProgressionStore`.
+
 ## DEC-020 — Phase 4 trip sync = single idempotent upsert
 - **Date:** 2026-09-15
 - **Status:** Accepted

@@ -16,7 +16,8 @@ Android-first driving adventure — telemetry, ascent ranks, vehicle vault, work
 | 2 | Pulse | Done — GPS engine, Room trips, FG service |
 | 3 | Cockpit | Done — MapLibre, calibration, G-gauge, drive modes |
 | 4 | Afterglow | Done — summary, replay, WorkManager sync, trip ingest |
-| 5–10 | … | Planned — see `plan/` |
+| 5 | Engine of Want | Done — server XP/scores, achievements, challenges, Home hub |
+| 6–10 | … | Planned — see `plan/` |
 
 ---
 
@@ -48,6 +49,15 @@ Android-first driving adventure — telemetry, ascent ranks, vehicle vault, work
 - Home stats from completed trips
 - WorkManager `TripSyncWorker` → idempotent `POST /v1/trips`
 - NestJS in-memory trip store (dedupe by `userId:clientTripId`)
+
+## Phase 5 — Engine of Want
+
+- Server scoring: Quality / Exploration / Activity → Adventure Score + Driver Rating
+- Versioned `GET /v1/scores/config` weights (not in APK)
+- XP ledger, levels, titles; achievements + daily/weekly challenges on trip finalize
+- Spoofed client `qualityScore` / `explorationXp` ignored for competitive awards
+- Home game hub (XP bar motion, streak, next challenge); Summary provisional → server final
+- More: post-drive notification opt-ins (level / challenge / streak)
 
 ---
 

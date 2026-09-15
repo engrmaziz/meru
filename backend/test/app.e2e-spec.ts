@@ -49,6 +49,7 @@ describe('Meru API (e2e)', () => {
       endAtMs: Date.now(),
       distanceM: 3200,
       durationMs: 60_000,
+      pointCount: 30,
       qualityScore: 90,
       locations: [{ ts: Date.now(), lat: 24.86, lon: 67.0 }],
       events: [{ ts: Date.now(), type: 'START', label: 'Drive started' }],
@@ -67,7 +68,15 @@ describe('Meru API (e2e)', () => {
       .expect(201);
 
     expect(first.body.duplicated).toBe(false);
+    expect(first.body.awards.xpAwarded).toBeGreaterThan(0);
     expect(second.body.duplicated).toBe(true);
     expect(second.body.id).toBe(first.body.id);
+
+    const scores = await request(app.getHttpServer())
+      .get('/v1/scores/me')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+    expect(scores.body.xpTotal).toBe(first.body.awards.xpAwarded);
+    expect(scores.body.weightsVersion).toBe(1);
   });
 });

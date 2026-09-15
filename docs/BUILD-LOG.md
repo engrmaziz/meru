@@ -80,3 +80,17 @@
 - **Tests:** GeoHashTest; TripsService unit; e2e trip upsert dedupe
 - **Strix:** skipped
 - **Follow-ups:** Phase 5 Engine of Want (server XP/achievements)
+
+### 2026-09-15 — Phase 5 Engine of Want progression
+- **Band / slice:** Phase 5 / Engine of Want
+- **Agent:** Cursor agent (commits as engrmaziz only)
+- **Ponytail rung used:** YAGNI (in-memory progression) + minimum server authority on trip upsert
+- **Context7 libs:** n/a
+- **Stitch screens:** Compose Home hub / Achievements / Challenges hand-built (Meru tokens, max post-drive juice)
+- **DEC referenced:** DEC-011 (server authority), DEC-019, DEC-020, DEC-021
+- **What shipped:** ProgressionService (scores, XP, titles, achievements, challenges); trip upsert awards; Android ProgressionStore; Home hub; Summary provisional→final; More notif toggles
+- **What deferred (ponytail:):** Postgres xp_ledger; push delivery; admin CRUD UI; full season boards
+- **Gamify/motion added:** XP bar animate, streak scale, achievement rarity frames, challenge progress
+- **Tests:** ProgressionService spoof-ignore + dedupe; e2e scores/me after trip
+- **Strix:** skipped
+- **Follow-ups:** Phase 6 Arena (leaderboards / seasons)

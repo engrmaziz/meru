@@ -50,14 +50,17 @@ import app.meru.android.core.database.TripDao
 import app.meru.android.core.database.TripEntity
 import app.meru.android.core.database.TripEventEntity
 import app.meru.android.core.database.TripLocationEntity
+import app.meru.android.core.datastore.ProgressionStore
 import app.meru.android.core.designsystem.components.MeruPrimaryButton
 import app.meru.android.core.designsystem.components.MeruSecondaryButton
 import app.meru.android.core.designsystem.theme.MeruAmber
+import app.meru.android.core.designsystem.theme.MeruCyan
 import app.meru.android.core.designsystem.theme.MeruElevated
 import app.meru.android.core.designsystem.theme.MeruMuted
 import app.meru.android.core.designsystem.theme.MeruTeal
 import app.meru.android.core.designsystem.theme.MeruText
 import app.meru.android.core.designsystem.theme.MeruVoid
+import app.meru.android.core.network.TripAwardsDto
 import app.meru.android.engine.telemetry.RoutePoint
 import app.meru.android.feature.drive.DriveMap
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -71,6 +74,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.math.max
@@ -88,11 +92,18 @@ class TripDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val tripDao: TripDao,
     private val explorationDao: ExplorationDao,
+    progressionStore: ProgressionStore,
 ) : ViewModel() {
     private val tripId: String = checkNotNull(savedStateHandle["tripId"])
 
     private val _state = MutableStateFlow(TripDetailState())
     val state: StateFlow<TripDetailState> = _state.asStateFlow()
+
+    val serverAwards: StateFlow<TripAwardsDto?> = progressionStore.snapshot
+        .map { snap ->
+            snap.lastAwards?.takeIf { it.clientTripId == tripId }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     init {
         viewModelScope.launch {
@@ -107,6 +118,15 @@ class TripDetailViewModel @Inject constructor(
                 loading = false,
                 totalCells = cells,
             )
+            // Refresh trip row when sync overlays server quality
+            while (true) {
+                delay(1500)
+                val refreshed = tripDao.getTrip(tripId) ?: break
+                if (refreshed != _state.value.trip) {
+                    _state.value = _state.value.copy(trip = refreshed)
+                }
+                if (refreshed.syncStatus == "synced") break
+            }
         }
     }
 }
@@ -158,6 +178,7 @@ fun TripSummaryScreen(
     viewModel: TripDetailViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+    val awards by viewModel.serverAwards.collectAsState()
     val trip = state.trip
 
     if (state.loading || trip == null) {
@@ -170,10 +191,13 @@ fun TripSummaryScreen(
         return
     }
 
+    val displayQuality = awards?.qualityScore ?: trip.qualityScore
+    val displayXp = awards?.xpAwarded ?: trip.explorationXp
+    val isFinal = awards != null || trip.syncStatus == "synced"
     val scoreAnim = remember { Animatable(0f) }
-    LaunchedEffect(trip.qualityScore) {
+    LaunchedEffect(displayQuality) {
         scoreAnim.snapTo(0f)
-        scoreAnim.animateTo(trip.qualityScore.toFloat(), tween(1200))
+        scoreAnim.animateTo(displayQuality.toFloat(), tween(1200))
     }
 
     Column(
@@ -186,6 +210,12 @@ fun TripSummaryScreen(
     ) {
         Text("ASCENT COMPLETE", color = MeruTeal, fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
         Text("Drive sealed", color = MeruText, fontSize = 28.sp, fontWeight = FontWeight.SemiBold)
+        Text(
+            if (isFinal) "Server final · spoofed client scores ignored"
+            else "Provisional — syncing final XP…",
+            color = if (isFinal) MeruCyan else MeruAmber,
+            fontSize = 13.sp,
+        )
 
         Column(
             modifier = Modifier
@@ -202,10 +232,14 @@ fun TripSummaryScreen(
                 fontSize = 64.sp,
                 fontWeight = FontWeight.Bold,
             )
-            Text("Adventure seal", color = MeruAmber, fontWeight = FontWeight.Medium)
+            Text(
+                awards?.title ?: "Adventure seal",
+                color = MeruAmber,
+                fontWeight = FontWeight.Medium,
+            )
             Spacer(modifier = Modifier.height(12.dp))
             LinearProgressIndicator(
-                progress = { (trip.explorationXp / 120f).coerceIn(0f, 1f) },
+                progress = { (displayXp / 400f).coerceIn(0f, 1f) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(10.dp)
@@ -214,7 +248,26 @@ fun TripSummaryScreen(
                 trackColor = MeruVoid,
             )
             Spacer(modifier = Modifier.height(6.dp))
-            Text("+${trip.explorationXp} exploration XP", color = MeruMuted, fontSize = 13.sp)
+            Text("+$displayXp XP awarded", color = MeruMuted, fontSize = 13.sp)
+            awards?.let { a ->
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    "Adventure ${a.adventureScore} · Rating ${a.driverRating} · Streak ${a.streakDays}",
+                    color = MeruTeal,
+                    fontSize = 12.sp,
+                )
+                if (!a.competitiveEligible) {
+                    Text("Integrity gate — boards locked for this trip", color = MeruAmber, fontSize = 12.sp)
+                }
+                a.unlockedAchievements.forEach { unlock ->
+                    Text(
+                        "Unlocked: ${unlock.title} (+${unlock.xpBonus})",
+                        color = MeruCyan,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                    )
+                }
+            }
         }
 
         if (trip.newCells > 0) {

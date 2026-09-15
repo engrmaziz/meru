@@ -9,6 +9,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import app.meru.android.core.database.PendingSyncDao
 import app.meru.android.core.database.TripDao
+import app.meru.android.core.datastore.ProgressionStore
 import app.meru.android.core.datastore.SessionStore
 import app.meru.android.core.network.MeruApi
 import app.meru.android.core.network.TripUpsertRequest
@@ -25,6 +26,7 @@ class TripSyncWorker @AssistedInject constructor(
     private val tripDao: TripDao,
     private val api: MeruApi,
     private val sessionStore: SessionStore,
+    private val progressionStore: ProgressionStore,
     private val json: Json,
 ) : CoroutineWorker(context, params) {
 
@@ -37,9 +39,29 @@ class TripSyncWorker @AssistedInject constructor(
         for (item in pending) {
             runCatching {
                 val body = json.decodeFromString(TripUpsertRequest.serializer(), item.payloadJson)
-                api.upsertTrip("Bearer $token", body)
-                tripDao.updateSyncStatus(item.id, "synced")
+                val res = api.upsertTrip("Bearer $token", body)
+                res.awards?.let { awards ->
+                    if (!res.duplicated) {
+                        progressionStore.applyAwards(awards)
+                    }
+                    // Overlay server quality onto local trip (provisional → final)
+                    val trip = tripDao.getTrip(item.id)
+                    if (trip != null) {
+                        tripDao.upsertTrip(
+                            trip.copy(
+                                qualityScore = awards.qualityScore,
+                                explorationXp = awards.xpAwarded,
+                                syncStatus = "synced",
+                            ),
+                        )
+                    } else {
+                        tripDao.updateSyncStatus(item.id, "synced")
+                    }
+                } ?: tripDao.updateSyncStatus(item.id, "synced")
                 pendingSyncDao.mark(item.id, "synced")
+                runCatching {
+                    progressionStore.applyScores(api.scoresMe("Bearer $token"))
+                }
             }.onFailure {
                 failures++
                 tripDao.updateSyncStatus(item.id, "failed")

@@ -94,6 +94,118 @@ data class TripUpsertResponse(
     val clientTripId: String,
     val integrity: Int = 90,
     val duplicated: Boolean = false,
+    val awards: TripAwardsDto? = null,
+)
+
+@Serializable
+data class TripAwardsDto(
+    val clientTripId: String,
+    val xpAwarded: Int = 0,
+    val level: Int = 1,
+    val title: String = "Novice Driver",
+    val adventureScore: Int = 0,
+    val driverRating: Int = 70,
+    val qualityScore: Int = 0,
+    val explorationScore: Int = 0,
+    val activityScore: Int = 0,
+    val integrity: Int = 90,
+    val competitiveEligible: Boolean = true,
+    val unlockedAchievements: List<AchievementUnlockDto> = emptyList(),
+    val challengeProgress: List<ChallengeProgressDto> = emptyList(),
+    val streakDays: Int = 0,
+    val weightsVersion: Int = 1,
+)
+
+@Serializable
+data class AchievementUnlockDto(
+    val id: String,
+    val title: String,
+    val rarity: String,
+    val xpBonus: Int = 0,
+)
+
+@Serializable
+data class ChallengeProgressDto(
+    val id: String,
+    val title: String,
+    val progress: Double = 0.0,
+    val target: Double = 1.0,
+    val completed: Boolean = false,
+)
+
+@Serializable
+data class ScoreComponentsDto(
+    val quality: Int = 0,
+    val exploration: Int = 0,
+    val activity: Int = 0,
+)
+
+@Serializable
+data class ScoresMeResponse(
+    val xpTotal: Int = 0,
+    val level: Int = 1,
+    val title: String = "Novice Driver",
+    val xpIntoLevel: Int = 0,
+    val xpForNextLevel: Int = 1000,
+    val adventureScore: Int = 0,
+    val driverRating: Int = 70,
+    val components: ScoreComponentsDto = ScoreComponentsDto(),
+    val streakDays: Int = 0,
+    val tripCount: Int = 0,
+    val totalDistanceM: Double = 0.0,
+    val totalCells: Int = 0,
+    val competitiveEligible: Boolean = true,
+    val weightsVersion: Int = 1,
+    val lastTripAwards: TripAwardsDto? = null,
+)
+
+@Serializable
+data class AchievementItemDto(
+    val id: String,
+    val title: String,
+    val description: String,
+    val rarity: String,
+    val xpBonus: Int = 0,
+    val unlocked: Boolean = false,
+)
+
+@Serializable
+data class AchievementsMeResponse(
+    val items: List<AchievementItemDto> = emptyList(),
+)
+
+@Serializable
+data class ChallengeItemDto(
+    val id: String,
+    val title: String,
+    val description: String,
+    val period: String,
+    val metric: String,
+    val target: Double = 0.0,
+    val xpReward: Int = 0,
+    val progress: Double = 0.0,
+    val completed: Boolean = false,
+    val periodKey: String = "",
+)
+
+@Serializable
+data class ScoreWeightsDto(
+    val version: Int = 1,
+    val quality: Double = 0.45,
+    val exploration: Double = 0.35,
+    val activity: Double = 0.2,
+    val xpPerQualityPoint: Double = 2.0,
+    val xpPerExplorationPoint: Double = 3.0,
+    val xpPerActivityPoint: Double = 1.0,
+    val xpPerKm: Double = 8.0,
+    val xpPerNewCell: Double = 12.0,
+    val integrityCompetitiveMin: Int = 75,
+    val levelXpStep: Int = 1000,
+)
+
+@Serializable
+data class ChallengesResponse(
+    val items: List<ChallengeItemDto> = emptyList(),
 )
 
 interface MeruApi {
@@ -114,6 +226,18 @@ interface MeruApi {
         @Header("Authorization") authorization: String,
         @Body body: TripUpsertRequest,
     ): TripUpsertResponse
+
+    @GET("v1/scores/me")
+    suspend fun scoresMe(@Header("Authorization") authorization: String): ScoresMeResponse
+
+    @GET("v1/scores/config")
+    suspend fun scoresConfig(): ScoreWeightsDto
+
+    @GET("v1/achievements/me")
+    suspend fun achievementsMe(@Header("Authorization") authorization: String): AchievementsMeResponse
+
+    @GET("v1/challenges")
+    suspend fun challenges(@Header("Authorization") authorization: String): ChallengesResponse
 }
 
 @Module

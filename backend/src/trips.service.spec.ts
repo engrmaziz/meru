@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ProgressionService } from './progression.service';
 import { TripsService } from './trips.controller';
 
 describe('TripsService', () => {
@@ -6,7 +7,7 @@ describe('TripsService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [TripsService],
+      providers: [ProgressionService, TripsService],
     }).compile();
     service = module.get(TripsService);
   });
@@ -16,6 +17,7 @@ describe('TripsService', () => {
       clientTripId: 'trip-1',
       startAtMs: 1,
       distanceM: 1200,
+      pointCount: 12,
       qualityScore: 88,
       locations: [{ ts: 1, lat: 1, lon: 2 }],
       events: [],
@@ -26,5 +28,6 @@ describe('TripsService', () => {
     expect(second.duplicated).toBe(true);
     expect(second.id).toBe(first.id);
     expect(service.countForUser('user-a')).toBe(1);
+    expect(first.awards?.xpAwarded).toBeGreaterThan(0);
   });
 });

@@ -58,22 +58,16 @@ Worker `trip.process`:
 ## B.4 Scores, XP, boards
 | Method | Path | Notes |
 |--------|------|-------|
-| GET | `/scores/me` | components + overall |
-| GET | `/scores/config` | public weights version |
-| GET | `/leaderboards/{geoType}/{geoId}` | query: period, board, cursor |
-| GET | `/seasons/current` | |
-| GET | `/friends/leaderboard` | |
-
-Worker `leaderboard.reindex`: recompute dirty users/geos; write `leaderboard_entries`; cache top N in Redis.
-
-Eligibility: integrity gates; min activity; season membership; leaderboard opt-in.
-
----
+| GET | `/scores/me` | **Phase 5:** components + Adventure + Driver Rating + XP/level/title/streak |
+| GET | `/scores/config` | **Phase 5:** public weights version |
+| GET | `/leaderboards/{geoType}/{geoId}` | query: period, board, cursor — Phase 6 |
+| GET | `/seasons/current` | Phase 6 |
+| GET | `/friends/leaderboard` | Phase 6 |
 
 ## B.5 Challenges & achievements
-- Admin CRUD configs.
-- On trip finalize / daily tick: evaluate progress.
-- Awards write `xp_ledger` + notifications.
+- **Phase 5:** `GET /achievements/me`, `GET /challenges`; evaluate on trip finalize (in-memory catalog).
+- Admin CRUD configs deferred.
+- Awards write xp ledger (in-memory) + notification prefs on client (no mid-drive push yet).
 
 ---
 
