@@ -38,3 +38,17 @@
 - **Tests:** backend AuthService unit tests + build
 - **Strix:** skipped
 - **Follow-ups:** Phase 2 driving engine; install Android SDK locally to assemble APK
+
+### 2026-09-15 — Phase 2 Pulse driving engine
+- **Band / slice:** Phase 2 / Drive engine
+- **Agent:** Cursor agent (commits as engrmaziz)
+- **Ponytail rung used:** minimum + platform (Fused Location / FG service)
+- **Context7 libs:** n/a (MCP not loaded this session)
+- **Stitch screens:** n/a (functional Drive UI only)
+- **DEC referenced:** DEC-017, DEC-018
+- **What shipped:** JumpFilter + GeoMath + TelemetryAccumulator; Room trips/locations; DriveSessionController; DriveForegroundService; permission primer; Drive start/end; local Trips list; DrivingMode locks More tab; unit tests for distance/jumps
+- **What deferred (ponytail:):** MapLibre UI, sensors/G-force, server trip sync, adaptive interval when stationary
+- **Gamify/motion added:** n/a (Drive-safe)
+- **Tests:** JVM unit tests in `TelemetryUnitTest.kt` (run when Android SDK present)
+- **Strix:** skipped
+- **Follow-ups:** Phase 3 cockpit polish + maps + sensors

@@ -9,7 +9,7 @@ import androidx.compose.material.icons.outlined.DirectionsCar
 import androidx.compose.material.icons.outlined.Garage
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.MoreHoriz
- import androidx.compose.material.icons.outlined.Route
+import androidx.compose.material.icons.outlined.Route
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -34,14 +34,14 @@ import app.meru.android.core.datastore.SessionStore
 import app.meru.android.core.designsystem.theme.MeruMuted
 import app.meru.android.core.designsystem.theme.MeruPanel
 import app.meru.android.core.designsystem.theme.MeruTeal
-import app.meru.android.core.designsystem.theme.MeruText
 import app.meru.android.core.designsystem.theme.MeruVoid
+import app.meru.android.engine.drive.DrivingMode
 import app.meru.android.feature.auth.AuthScreen
 import app.meru.android.feature.drive.DriveReadyScreen
 import app.meru.android.feature.garage.GarageStubScreen
 import app.meru.android.feature.home.HomeScreen
 import app.meru.android.feature.more.MoreScreen
-import app.meru.android.feature.trips.TripsStubScreen
+import app.meru.android.feature.trips.TripsListScreen
 import app.meru.android.feature.welcome.WelcomeScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -52,10 +52,14 @@ import kotlinx.coroutines.flow.stateIn
 @HiltViewModel
 class RootViewModel @Inject constructor(
     sessionStore: SessionStore,
+    drivingMode: DrivingMode,
 ) : ViewModel() {
     val loggedIn = sessionStore.session
         .map { it.isLoggedIn }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    val driving = drivingMode.active
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 }
 
 @Composable
@@ -75,7 +79,7 @@ fun MeruRoot(
             }
         }
         false -> AuthGraph()
-        true -> MainGraph()
+        true -> MainGraph(rootViewModel)
     }
 }
 
@@ -96,10 +100,11 @@ private fun AuthGraph() {
 }
 
 @Composable
-private fun MainGraph() {
+private fun MainGraph(rootViewModel: RootViewModel) {
     val navController = rememberNavController()
     val backStack by navController.currentBackStackEntryAsState()
     val current = backStack?.destination?.route
+    val driving by rootViewModel.driving.collectAsState()
 
     Scaffold(
         containerColor = MeruVoid,
@@ -107,8 +112,10 @@ private fun MainGraph() {
             NavigationBar(containerColor = MeruPanel) {
                 mainTabs.forEach { route ->
                     val selected = current == route.path
+                    val locked = driving && route == MeruRoute.More
                     NavigationBarItem(
                         selected = selected,
+                        enabled = !locked,
                         onClick = {
                             navController.navigate(route.path) {
                                 popUpTo(navController.graph.findStartDestination().id) {
@@ -137,7 +144,7 @@ private fun MainGraph() {
                                     MeruRoute.Drive -> "Drive"
                                     MeruRoute.Trips -> "Trips"
                                     MeruRoute.Garage -> "Garage"
-                                    else -> "More"
+                                    else -> if (locked) "Locked" else "More"
                                 },
                             )
                         },
@@ -146,6 +153,8 @@ private fun MainGraph() {
                             selectedTextColor = MeruTeal,
                             unselectedIconColor = MeruMuted,
                             unselectedTextColor = MeruMuted,
+                            disabledIconColor = MeruMuted.copy(alpha = 0.4f),
+                            disabledTextColor = MeruMuted.copy(alpha = 0.4f),
                             indicatorColor = MeruVoid,
                         ),
                     )
@@ -160,7 +169,7 @@ private fun MainGraph() {
         ) {
             composable(MeruRoute.Home.path) { HomeScreen() }
             composable(MeruRoute.Drive.path) { DriveReadyScreen() }
-            composable(MeruRoute.Trips.path) { TripsStubScreen() }
+            composable(MeruRoute.Trips.path) { TripsListScreen() }
             composable(MeruRoute.Garage.path) { GarageStubScreen() }
             composable(MeruRoute.More.path) { MoreScreen() }
         }
