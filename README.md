@@ -111,6 +111,15 @@ npm run start:dev
 
 Open `android/` in Android Studio (SDK required). Emulator API base URL is `http://10.0.2.2:3000/`.
 
+## Run workshop staff web
+
+```bash
+cd workshop-web
+npm install
+npm run dev
+# http://localhost:3001 — paste Bearer token + X-Workshop-Id (e.g. ws-audi-lhr)
+```
+
 ## Docs & plan
 
 - `plan/` — 10 sequential phases
