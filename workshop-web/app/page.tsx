@@ -19,7 +19,7 @@ const styles = {
     margin: 0,
     background: "linear-gradient(160deg, #0B0F14 0%, #121821 55%, #0B0F14 100%)",
     color: "#F4F7FB",
-    fontFamily: '"Segoe UI", system-ui, sans-serif",
+    fontFamily: '"Segoe UI", system-ui, sans-serif',
     padding: "32px 24px 64px",
   } as const,
   brand: { fontSize: 42, fontWeight: 700, letterSpacing: "-0.03em", margin: 0 } as const,

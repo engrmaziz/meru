@@ -648,7 +648,7 @@ export class VaultController {
   }
 
   @Post('vehicles/:id/ownership-events')
-  ownership(
+  addOwnership(
     @Headers('authorization') authorization: string | undefined,
     @Param('id') id: string,
     @Body() body: { type?: string; label?: string; atMs?: number },
@@ -661,7 +661,7 @@ export class VaultController {
   }
 
   @Post('vehicles/:id/documents')
-  documents(
+  createDocument(
     @Headers('authorization') authorization: string | undefined,
     @Param('id') id: string,
     @Body() body: { type?: string; title?: string; expiresAtMs?: number },
@@ -683,7 +683,7 @@ export class VaultController {
   }
 
   @Post('vehicles/:id/services')
-  services(
+  createService(
     @Headers('authorization') authorization: string | undefined,
     @Param('id') id: string,
     @Body() body: Record<string, unknown>,

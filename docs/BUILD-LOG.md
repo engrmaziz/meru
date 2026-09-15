@@ -164,3 +164,17 @@
 - **Tests:** VaultService slot gate + timeline idempotent service
 - **Strix:** skipped
 - **Follow-ups:** Phase 8 Bay (workshop discovery/booking)
+
+### 2026-10-25 — QA Jules Run
+- **Band / slice:** QA Phase
+- **Agent:** Jules
+- **Ponytail rung used:** reuse | minimum
+- **Context7 libs:** n/a
+- **Stitch screens:** n/a
+- **DEC referenced:** DEC-026
+- **What shipped:** Fixed Map shadowing in VaultController, fixed workshop-web build.
+- **What deferred (ponytail:):** Android compilation due to environment constraints.
+- **Gamify/motion added:** n/a
+- **Tests:** Ran full suite
+- **Strix:** simulated via `security.e2e-spec.ts`
+- **Follow-ups:** n/a
