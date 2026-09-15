@@ -21,10 +21,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.Modifier.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalAccessibilityManager
+import app.meru.android.core.designsystem.theme.rememberReduceMotion
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -87,8 +87,7 @@ fun AchievementsScreen(
 ) {
     val items by viewModel.achievements.collectAsState()
     val error by viewModel.error.collectAsState()
-    val a11y = LocalAccessibilityManager.current
-    val reduceMotion = a11y?.isEnabled == true
+    val reduceMotion = rememberReduceMotion()
     LaunchedEffect(Unit) { viewModel.load() }
 
     Column(
@@ -98,13 +97,13 @@ fun AchievementsScreen(
             .padding(20.dp),
     ) {
         Text("Achievements", color = MeruText, fontSize = 28.sp, fontWeight = FontWeight.SemiBold)
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier = Modifier.height(8.dp))
         Text("Rarity frames unlock after server finalize", color = MeruMuted)
         error?.let {
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier = Modifier.height(8.dp))
             Text(it, color = MeruAmber, fontSize = 13.sp)
         }
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier = Modifier.height(16.dp))
         LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.weight(1f)) {
             items(items, key = { it.id }) { item ->
                 val scale by animateFloatAsState(
@@ -131,9 +130,9 @@ fun AchievementsScreen(
                             fontWeight = FontWeight.Bold,
                         )
                     }
-                    Spacer(Modifier.height(4.dp))
+                    Spacer(Modifier = Modifier.height(4.dp))
                     Text(item.description, color = MeruMuted, fontSize = 13.sp)
-                    Spacer(Modifier.height(6.dp))
+                    Spacer(Modifier = Modifier.height(6.dp))
                     Text(
                         if (item.unlocked) "Unlocked · +${item.xpBonus} XP" else "Locked · +${item.xpBonus} XP",
                         color = if (item.unlocked) MeruTeal else MeruMuted,
@@ -142,7 +141,7 @@ fun AchievementsScreen(
                 }
             }
         }
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier = Modifier.height(12.dp))
         MeruSecondaryButton(text = "Back", onClick = onBack)
     }
 }
@@ -163,13 +162,13 @@ fun ChallengesScreen(
             .padding(20.dp),
     ) {
         Text("Challenges", color = MeruText, fontSize = 28.sp, fontWeight = FontWeight.SemiBold)
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier = Modifier.height(8.dp))
         Text("Daily & weekly — progress ticks on trip finalize", color = MeruMuted)
         error?.let {
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier = Modifier.height(8.dp))
             Text(it, color = MeruAmber, fontSize = 13.sp)
         }
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier = Modifier.height(16.dp))
         LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.weight(1f)) {
             items(items, key = { it.id }) { c ->
                 Column(
@@ -183,9 +182,9 @@ fun ChallengesScreen(
                         Text(c.title, color = MeruText, fontWeight = FontWeight.SemiBold)
                         Text(c.period.uppercase(Locale.US), color = MeruCyan, fontSize = 11.sp)
                     }
-                    Spacer(Modifier.height(4.dp))
+                    Spacer(Modifier = Modifier.height(4.dp))
                     Text(c.description, color = MeruMuted, fontSize = 13.sp)
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier = Modifier.height(8.dp))
                     val p = if (c.target <= 0) 0f else (c.progress / c.target).toFloat().coerceIn(0f, 1f)
                     LinearProgressIndicator(
                         progress = { p },
@@ -196,7 +195,7 @@ fun ChallengesScreen(
                         color = if (c.completed) MeruTeal else MeruAmber,
                         trackColor = MeruVoid,
                     )
-                    Spacer(Modifier.height(6.dp))
+                    Spacer(Modifier = Modifier.height(6.dp))
                     Text(
                         String.format(
                             Locale.US,
@@ -212,7 +211,7 @@ fun ChallengesScreen(
                 }
             }
         }
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier = Modifier.height(12.dp))
         MeruSecondaryButton(text = "Back", onClick = onBack)
     }
 }

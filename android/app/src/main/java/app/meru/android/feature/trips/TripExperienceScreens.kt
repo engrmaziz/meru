@@ -32,7 +32,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.Modifier.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
@@ -302,16 +302,16 @@ fun TripSummaryScreen(
         }
 
         Row(Modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            SummaryStat(Modifier = Modifier.weight(1f), "Distance", String.format(Locale.US, "%.2f km", trip.distanceM / 1000))
-            SummaryStat(modifier = Modifier.weight(1f), "Duration", formatDuration(trip.durationMs))
+            SummaryStat("Distance", String.format(Locale.US, "%.2f km", trip.distanceM / 1000), Modifier.weight(1f))
+            SummaryStat("Duration", formatDuration(trip.durationMs), Modifier.weight(1f))
         }
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            SummaryStat(modifier = Modifier.weight(1f), "Avg", String.format(Locale.US, "%.0f km/h", trip.avgSpeedKmh))
-            SummaryStat(modifier = Modifier.weight(1f), "Max", String.format(Locale.US, "%.0f km/h", trip.maxSpeedKmh))
+            SummaryStat("Avg", String.format(Locale.US, "%.0f km/h", trip.avgSpeedKmh), Modifier.weight(1f))
+            SummaryStat("Max", String.format(Locale.US, "%.0f km/h", trip.maxSpeedKmh), Modifier.weight(1f))
         }
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            SummaryStat(Modifier = Modifier.weight(1f), "Climb", String.format(Locale.US, "%.0f m", trip.elevationGainM))
-            SummaryStat(modifier = Modifier.weight(1f), "Sync", trip.syncStatus)
+            SummaryStat("Climb", String.format(Locale.US, "%.0f m", trip.elevationGainM), Modifier.weight(1f))
+            SummaryStat("Sync", trip.syncStatus, Modifier.weight(1f))
         }
 
         MeruPrimaryButton(text = "Open timeline & replay", onClick = { onOpenDetail(trip.id) })
@@ -321,7 +321,7 @@ fun TripSummaryScreen(
 }
 
 @Composable
-private fun SummaryStat(modifier: Modifier, label: String, value: String) {
+private fun SummaryStat(label: String, value: String, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(14.dp))
@@ -352,7 +352,7 @@ fun TripDetailScreen(
     }
 
     val route = remember(state.locations) {
-        state.locations.map { RoutePoint(it.latitude, it.longitude, it.bearing ?: 0f) }
+        state.locations.map { RoutePoint(it.latitude, it.longitude) }
     }
     var replayIndex by remember { mutableFloatStateOf(0f) }
     val idx = replayIndex.toInt().coerceIn(0, max(0, state.locations.lastIndex))

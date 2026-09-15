@@ -81,6 +81,7 @@ private val MeruTypography = androidx.compose.material3.Typography(
     ),
 )
 
+@Composable
 fun MeruTheme(
     content: @Composable () -> Unit,
 ) {

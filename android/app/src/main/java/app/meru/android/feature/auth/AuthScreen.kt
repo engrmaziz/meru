@@ -17,7 +17,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.Modifier.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -63,12 +63,12 @@ fun AuthScreen(
             color = MeruText,
             fontSize = 28.sp,
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier = Modifier.height(8.dp))
         Text(
             text = "Meru keeps your drives and your cars in one ascent.",
             color = MeruMuted,
         )
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier = Modifier.height(24.dp))
 
         if (state.modeRegister) {
             OutlinedTextField(
@@ -79,7 +79,7 @@ fun AuthScreen(
                 colors = fieldColors,
                 singleLine = true,
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier = Modifier.height(12.dp))
         }
 
         OutlinedTextField(
@@ -91,7 +91,7 @@ fun AuthScreen(
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
         )
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier = Modifier.height(12.dp))
         OutlinedTextField(
             value = state.password,
             onValueChange = viewModel::onPassword,
@@ -104,11 +104,11 @@ fun AuthScreen(
         )
 
         state.error?.let {
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier = Modifier.height(12.dp))
             Text(text = it, color = MeruDanger)
         }
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier = Modifier.height(24.dp))
         if (state.loading) {
             CircularProgressIndicator(color = MeruTeal)
         } else {
@@ -116,12 +116,12 @@ fun AuthScreen(
                 text = if (state.modeRegister) "Register" else "Sign in",
                 onClick = viewModel::submit,
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier = Modifier.height(12.dp))
             MeruSecondaryButton(
                 text = "Continue with Google (dev)",
                 onClick = viewModel::continueWithGoogleDev,
             )
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier = Modifier.height(8.dp))
             TextButton(onClick = viewModel::toggleMode) {
                 Text(
                     text = if (state.modeRegister) "Have an account? Sign in" else "Need an account? Register",

@@ -33,16 +33,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.Modifier.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalAccessibilityManager
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import app.meru.android.core.designsystem.theme.rememberReduceMotion
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.meru.android.core.database.ExplorationDao
@@ -192,8 +192,7 @@ fun LeaderboardsScreen(
     val error by viewModel.error.collectAsState()
     val optIn by viewModel.boardOptIn.collectAsState()
     var showFriends by remember { mutableStateOf(false) }
-    val a11y = LocalAccessibilityManager.current
-    val reduceMotion = a11y?.isEnabled == true
+    val reduceMotion = rememberReduceMotion()
 
     LaunchedEffect(Unit) { viewModel.loadBoard() }
 
@@ -210,10 +209,10 @@ fun LeaderboardsScreen(
             fontSize = 14.sp,
         )
         error?.let {
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier = Modifier.height(6.dp))
             Text(it, color = MeruAmber, fontSize = 12.sp)
         }
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier = Modifier.height(12.dp))
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             geoTabs.forEachIndexed { i, g ->
@@ -233,7 +232,7 @@ fun LeaderboardsScreen(
                 )
             }
         }
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier = Modifier.height(8.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             FilterChip(
                 selected = showFriends,
@@ -267,16 +266,16 @@ fun LeaderboardsScreen(
         }
 
         if (!optIn) {
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier = Modifier.height(8.dp))
             Text("You are hidden from boards (privacy).", color = MeruAmber, fontSize = 12.sp)
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier = Modifier.height(12.dp))
 
         if (!showFriends) {
             board?.podium?.takeIf { it.isNotEmpty() }?.let { podium ->
                 PodiumRow(podium, reduceMotion)
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier = Modifier.height(12.dp))
             }
         }
 
@@ -295,12 +294,12 @@ fun LeaderboardsScreen(
         }
 
         board?.you?.takeIf { it.rank > 0 }?.let { you ->
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier = Modifier.height(8.dp))
             Text("YOU", color = MeruMuted, fontSize = 11.sp, letterSpacing = 1.sp)
             BoardRow(entry = you, highlight = true, sticky = true)
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier = Modifier.height(12.dp))
         MeruSecondaryButton(text = "Back", onClick = onBack)
     }
 }
@@ -432,7 +431,7 @@ fun AdventureMapScreen(
             color = MeruTeal,
             fontSize = 14.sp,
         )
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier = Modifier.height(16.dp))
 
         Column(
             modifier = Modifier
@@ -448,7 +447,7 @@ fun AdventureMapScreen(
                 fontSize = 42.sp,
                 fontWeight = FontWeight.Bold,
             )
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier = Modifier.height(8.dp))
             LinearProgressIndicator(
                 progress = { progress },
                 modifier = Modifier
@@ -458,7 +457,7 @@ fun AdventureMapScreen(
                 color = MeruTeal,
                 trackColor = MeruVoid,
             )
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier = Modifier.height(8.dp))
             Text(
                 "Server cells ${exploration?.cellsExplored ?: 0} · local atlas $localCells",
                 color = MeruMuted,
@@ -466,9 +465,9 @@ fun AdventureMapScreen(
             )
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier = Modifier.height(16.dp))
         Text("Geohash glow", color = MeruText, fontWeight = FontWeight.Medium)
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier = Modifier.height(8.dp))
         val cells = exploration?.sampleCells.orEmpty()
         if (cells.isEmpty()) {
             Text("Drive to light up Lahore cells.", color = MeruMuted)
@@ -495,7 +494,7 @@ fun AdventureMapScreen(
             }
         }
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier = Modifier.height(24.dp))
         MeruSecondaryButton(text = "Back", onClick = onBack)
     }
 }
@@ -517,7 +516,7 @@ fun ShareCardScreen(
     ) {
         Text("Share card", color = MeruText, fontSize = 28.sp, fontWeight = FontWeight.SemiBold)
         Text("Privacy-safe — no exact location", color = MeruMuted)
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier = Modifier.height(20.dp))
 
         share?.let { s ->
             Column(
@@ -529,20 +528,20 @@ fun ShareCardScreen(
                     .padding(20.dp),
             ) {
                 Text("MERU", color = MeruTeal, fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier = Modifier.height(8.dp))
                 Text(s.displayName, color = MeruText, fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
                 Text("${s.title} · Level ${s.level}", color = MeruCyan)
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier = Modifier.height(12.dp))
                 Text("Adventure ${s.adventureScore}", color = MeruText, fontSize = 20.sp)
                 Text(
                     "${s.cityName} rank ${s.cityRank ?: "—"} · ${s.seasonName}",
                     color = MeruMuted,
                     fontSize = 13.sp,
                 )
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier = Modifier.height(12.dp))
                 Text(s.tagline, color = MeruAmber, fontWeight = FontWeight.Medium)
             }
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier = Modifier.height(16.dp))
             MeruPrimaryButton(
                 text = "Copy share text",
                 onClick = {
@@ -556,7 +555,7 @@ fun ShareCardScreen(
             )
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier = Modifier.height(12.dp))
         MeruSecondaryButton(text = "Back", onClick = onBack)
     }
 }

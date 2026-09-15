@@ -28,10 +28,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.Modifier.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalAccessibilityManager
+import app.meru.android.core.designsystem.theme.rememberReduceMotion
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -62,8 +62,7 @@ fun DriveReadyScreen(
     val motion by viewModel.motion.collectAsState()
     val route by viewModel.route.collectAsState()
     val ui by viewModel.ui.collectAsState()
-    val a11y = LocalAccessibilityManager.current
-    val reduceMotion = a11y?.isEnabled == true
+    val reduceMotion = rememberReduceMotion()
     val enterScale by animateFloatAsState(
         targetValue = 1f,
         label = "driveEnter",

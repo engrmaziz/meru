@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.Modifier.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -54,14 +54,14 @@ fun WelcomeScreen(
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 4.sp,
                 )
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier = Modifier.height(12.dp))
                 Text(
                     text = "Every drive becomes an ascent.",
                     color = MeruText,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Medium,
                 )
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier = Modifier.height(10.dp))
                 Text(
                     text = "Live telemetry. Adventure ranks. A vault for every car.",
                     color = MeruMuted,
@@ -87,9 +87,9 @@ fun WelcomeScreen(
                             ),
                         ),
                 )
-                Spacer(Modifier.height(28.dp))
+                Spacer(Modifier = Modifier.height(28.dp))
                 MeruPrimaryButton(text = "Create account", onClick = onCreateAccount)
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier = Modifier.height(12.dp))
                 MeruSecondaryButton(text = "Sign in", onClick = onSignIn)
             }
         }

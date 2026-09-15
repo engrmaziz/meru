@@ -24,10 +24,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.Modifier.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.platform.LocalAccessibilityManager
+import app.meru.android.core.designsystem.theme.rememberReduceMotion
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -145,8 +145,7 @@ fun HomeScreen(
     val ranks by viewModel.ranks.collectAsState()
     val refreshError by viewModel.refreshError.collectAsState()
     val name = session?.displayName ?: "Driver"
-    val a11y = LocalAccessibilityManager.current
-    val reduceMotion = a11y?.isEnabled == true
+    val reduceMotion = rememberReduceMotion()
 
     val xpProgress = if (progression.xpForNextLevel <= 0) 0f
     else progression.xpIntoLevel / progression.xpForNextLevel.toFloat()
@@ -175,11 +174,11 @@ fun HomeScreen(
         Text(name, color = MeruText, fontSize = 28.sp, fontWeight = FontWeight.SemiBold)
         Text(progression.title, color = MeruTeal, fontSize = 14.sp, fontWeight = FontWeight.Medium)
         refreshError?.let {
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier = Modifier.height(6.dp))
             Text(it, color = MeruAmber, fontSize = 12.sp)
         }
 
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier = Modifier.height(20.dp))
 
         Column(
             modifier = Modifier
@@ -200,7 +199,7 @@ fun HomeScreen(
                     fontSize = 13.sp,
                 )
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier = Modifier.height(8.dp))
             LinearProgressIndicator(
                 progress = { animatedXp },
                 modifier = Modifier
@@ -210,7 +209,7 @@ fun HomeScreen(
                 color = MeruTeal,
                 trackColor = MeruVoid,
             )
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier = Modifier.height(8.dp))
             Text(
                 "Server XP · weights v${progression.weightsVersion.coerceAtLeast(1)}",
                 color = MeruMuted,
@@ -218,7 +217,7 @@ fun HomeScreen(
             )
         }
 
-        Spacer(Modifier.height(14.dp))
+        Spacer(Modifier = Modifier.height(14.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -237,7 +236,7 @@ fun HomeScreen(
             )
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier = Modifier.height(12.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -265,10 +264,10 @@ fun HomeScreen(
             )
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier = Modifier.height(12.dp))
         if (ranks.isNotEmpty()) {
             Text("SEASON RANKS", color = MeruMuted, fontSize = 11.sp, letterSpacing = 1.sp)
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -301,10 +300,10 @@ fun HomeScreen(
                 }
             }
             if (driving) {
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier = Modifier.height(4.dp))
                 Text("Boards locked while driving", color = MeruAmber, fontSize = 11.sp)
             }
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier = Modifier.height(12.dp))
         }
 
         challenge?.let { c ->
@@ -317,10 +316,10 @@ fun HomeScreen(
                     .padding(14.dp),
             ) {
                 Text("NEXT CHALLENGE", color = MeruTeal, fontSize = 11.sp, letterSpacing = 1.sp)
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier = Modifier.height(4.dp))
                 Text(c.title, color = MeruText, fontWeight = FontWeight.SemiBold)
                 Text(c.description, color = MeruMuted, fontSize = 13.sp)
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier = Modifier.height(8.dp))
                 val p = if (c.target <= 0) 0f else (c.progress / c.target).toFloat().coerceIn(0f, 1f)
                 LinearProgressIndicator(
                     progress = { p },
@@ -331,7 +330,7 @@ fun HomeScreen(
                     color = MeruAmber,
                     trackColor = MeruVoid,
                 )
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier = Modifier.height(4.dp))
                 Text(
                     String.format(Locale.US, "%.0f / %.0f · +%d XP", c.progress, c.target, c.xpReward),
                     color = MeruMuted,
@@ -340,45 +339,45 @@ fun HomeScreen(
             }
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier = Modifier.height(12.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-            StatChip(Modifier.weight(1f), "Trips", local.tripCount.toString())
-            StatChip(Modifier.weight(1f), "Cells", local.cells.toString())
+            StatChip("Trips", local.tripCount.toString(), Modifier.weight(1f))
+            StatChip("Cells", local.cells.toString(), Modifier.weight(1f))
         }
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier = Modifier.height(12.dp))
         StatChip(
-            Modifier.fillMaxWidth(),
             "Distance",
             String.format(Locale.US, "%.1f km", local.distanceKm),
+            Modifier.fillMaxWidth(),
         )
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier = Modifier.height(16.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-            HubLink(Modifier.weight(1f), "Achievements", onOpenAchievements)
-            HubLink(Modifier.weight(1f), "Challenges", onOpenChallenges)
+            HubLink("Achievements", onOpenAchievements, Modifier.weight(1f))
+            HubLink("Challenges", onOpenChallenges, Modifier.weight(1f))
         }
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier = Modifier.height(12.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
             HubLink(
-                Modifier.weight(1f),
-                if (driving) "Arena locked" else "Arena",
+                label = if (driving) "Arena locked" else "Arena",
                 onClick = { if (!driving) onOpenLeaderboards() },
+                modifier = Modifier.weight(1f),
             )
             HubLink(
-                Modifier.weight(1f),
-                if (driving) "Map locked" else "Adventure map",
+                label = if (driving) "Map locked" else "Adventure map",
                 onClick = { if (!driving) onOpenAdventureMap() },
+                modifier = Modifier.weight(1f),
             )
         }
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier = Modifier.height(24.dp))
         Text("Next ascent", color = MeruText, fontWeight = FontWeight.Medium)
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier = Modifier.height(8.dp))
         Text(
             "Drive, seal, then watch server XP and unlocks land on Home.",
             color = MeruMuted,
         )
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier = Modifier.height(24.dp))
     }
 }
 
@@ -396,13 +395,13 @@ private fun ScoreChip(
             .padding(14.dp),
     ) {
         Text(label, color = MeruMuted, fontSize = 12.sp)
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier = Modifier.height(6.dp))
         Text(value, color = accent, fontSize = 26.sp, fontWeight = FontWeight.Bold)
     }
 }
 
 @Composable
-private fun StatChip(modifier: Modifier, label: String, value: String) {
+private fun StatChip(label: String, value: String, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
@@ -410,13 +409,13 @@ private fun StatChip(modifier: Modifier, label: String, value: String) {
             .padding(14.dp),
     ) {
         Text(label, color = MeruMuted, fontSize = 12.sp)
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier = Modifier.height(6.dp))
         Text(value, color = MeruText, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
     }
 }
 
 @Composable
-private fun HubLink(modifier: Modifier, label: String, onClick: () -> Unit) {
+private fun HubLink(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Text(
         text = label,
         color = MeruVoid,

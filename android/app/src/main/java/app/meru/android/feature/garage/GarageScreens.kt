@@ -31,7 +31,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.Modifier.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
@@ -369,10 +369,10 @@ fun GarageListScreen(
         Text("Garage", color = MeruText, fontSize = 28.sp, fontWeight = FontWeight.SemiBold)
         Text("Vault · $max slot${if (max == 1) "" else "s"}", color = MeruTeal, fontSize = 13.sp)
         error?.let {
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier = Modifier.height(6.dp))
             Text(it, color = MeruAmber, fontSize = 12.sp)
         }
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier = Modifier.height(16.dp))
         if (vehicles.isEmpty()) {
             Box(Modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                 Text("Add your first car — one slot free.", color = MeruMuted)
@@ -408,7 +408,7 @@ fun GarageListScreen(
                 }
             }
         }
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier = Modifier.height(12.dp))
         MeruPrimaryButton(
             text = if (canAdd) "Add vehicle" else "Unlock extra slot",
             onClick = { if (canAdd) onAddVehicle() else onPaywall() },
@@ -462,7 +462,7 @@ fun AddVehicleScreen(
                 Text(nickname.ifBlank { "Will use make + model" }, color = MeruMuted)
             }
         }
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier = Modifier.height(8.dp))
         if (step < 2) {
             MeruPrimaryButton(text = "Continue", onClick = { step++ })
         } else {
@@ -513,16 +513,16 @@ fun VehicleTimelineScreen(
             color = MeruMuted,
         )
         message?.let {
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier = Modifier.height(6.dp))
             Text(it, color = MeruAmber, fontSize = 12.sp)
         }
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier = Modifier.height(12.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-            SummaryChip(Modifier.weight(1f), "Lifetime", String.format(Locale.US, "%.0f", cost))
-            SummaryChip(Modifier.weight(1f), "Visits", "${timeline?.summary?.serviceVisits ?: 0}")
-            SummaryChip(Modifier.weight(1f), "Docs", "${timeline?.summary?.documentCount ?: 0}")
+            SummaryChip("Lifetime", String.format(Locale.US, "%.0f", cost), Modifier.weight(1f))
+            SummaryChip("Visits", "${timeline?.summary?.serviceVisits ?: 0}", Modifier.weight(1f))
+            SummaryChip("Docs", "${timeline?.summary?.documentCount ?: 0}", Modifier.weight(1f))
         }
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier = Modifier.height(12.dp))
         LazyColumn(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -552,19 +552,19 @@ fun VehicleTimelineScreen(
                 }
             }
         }
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier = Modifier.height(8.dp))
         MeruPrimaryButton(text = "Add service", onClick = onAddService)
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier = Modifier.height(8.dp))
         MeruSecondaryButton(
             text = "Upload document",
             onClick = { viewModel.addDocument(docTitle, "insurance") },
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier = Modifier.height(8.dp))
         MeruSecondaryButton(text = "Create history share", onClick = { viewModel.createShare() })
         share?.let {
             Text("Share token: ${it.take(12)}…", color = MeruCyan, fontSize = 11.sp)
         }
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier = Modifier.height(8.dp))
         MeruSecondaryButton(text = "Back", onClick = onBack)
     }
 }
@@ -632,23 +632,23 @@ fun VehiclePaywallScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text("Extra vault slot", color = MeruText, fontSize = 26.sp, fontWeight = FontWeight.SemiBold)
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier = Modifier.height(8.dp))
         Text(
             "One car is free. Unlock another slot to keep every story in Meru.",
             color = MeruMuted,
         )
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier = Modifier.height(20.dp))
         MeruPrimaryButton(
             text = "Purchase slot (dev verify)",
             onClick = { viewModel.purchaseSlot(onPurchased) },
         )
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier = Modifier.height(12.dp))
         MeruSecondaryButton(text = "Not now", onClick = onBack)
     }
 }
 
 @Composable
-private fun SummaryChip(modifier: Modifier, label: String, value: String) {
+private fun SummaryChip(label: String, value: String, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
