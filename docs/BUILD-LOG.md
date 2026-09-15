@@ -94,3 +94,17 @@
 - **Tests:** ProgressionService spoof-ignore + dedupe; e2e scores/me after trip
 - **Strix:** skipped
 - **Follow-ups:** Phase 6 Arena (leaderboards / seasons)
+
+### 2026-09-15 — Phase 6 Arena boards & adventure map
+- **Band / slice:** Phase 6 / Arena
+- **Agent:** Cursor agent (commits as engrmaziz only)
+- **Ponytail rung used:** YAGNI (in-memory boards + bot seed) + platform (Driving Mode lock)
+- **Context7 libs:** n/a
+- **Stitch screens:** Compose Arena / Adventure map / Share card hand-built
+- **DEC referenced:** DEC-011, DEC-019, DEC-022
+- **What shipped:** Geo seed PK/PB/LHR; season boards reindex on trip; friends follow; ranks/me; exploration map; ghost compare; share card; opt-out; Driving Mode board lock; admin flags stub
+- **What deferred (ponytail:):** Redis top-N; Postgres leaderboard_entries; push rank deltas; MapLibre exploration polygons
+- **Gamify/motion added:** Podium scale-in, rank delta chips, Home rank strip
+- **Tests:** ArenaService ranks + opt-out
+- **Strix:** skipped
+- **Follow-ups:** Phase 7 Vault (garage)

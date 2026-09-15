@@ -1,4 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ArenaService } from './arena.service';
+import { AuthService } from './auth.service';
 import { ProgressionService } from './progression.service';
 import { TripsService } from './trips.controller';
 
@@ -7,7 +9,7 @@ describe('TripsService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ProgressionService, TripsService],
+      providers: [ProgressionService, ArenaService, AuthService, TripsService],
     }).compile();
     service = module.get(TripsService);
   });
@@ -19,7 +21,10 @@ describe('TripsService', () => {
       distanceM: 1200,
       pointCount: 12,
       qualityScore: 88,
-      locations: [{ ts: 1, lat: 1, lon: 2 }],
+      locations: [
+        { ts: 1, lat: 1, lon: 2 },
+        { ts: 2, lat: 1.01, lon: 2.01 },
+      ],
       events: [],
     };
     const first = service.upsert('user-a', body);

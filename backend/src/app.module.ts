@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { ArenaController } from './arena.controller';
+import { ArenaService } from './arena.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { HealthController } from './health.controller';
@@ -8,7 +10,13 @@ import { TripsController, TripsService } from './trips.controller';
 
 @Module({
   imports: [],
-  controllers: [HealthController, AuthController, TripsController, ProgressionController],
-  providers: [AuthService, TripsService, ProgressionService],
+  controllers: [
+    HealthController,
+    AuthController,
+    TripsController,
+    ProgressionController,
+    ArenaController,
+  ],
+  providers: [AuthService, TripsService, ProgressionService, ArenaService],
 })
 export class AppModule {}

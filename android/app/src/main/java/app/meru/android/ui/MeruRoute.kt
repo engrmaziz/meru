@@ -24,6 +24,9 @@ sealed class MeruRoute(val path: String) {
 
     data object Achievements : MeruRoute("achievements")
     data object Challenges : MeruRoute("challenges")
+    data object Leaderboards : MeruRoute("leaderboards")
+    data object AdventureMap : MeruRoute("adventure_map")
+    data object ShareCard : MeruRoute("share_card")
 }
 
 val mainTabs = listOf(

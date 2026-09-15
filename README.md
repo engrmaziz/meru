@@ -17,7 +17,8 @@ Android-first driving adventure — telemetry, ascent ranks, vehicle vault, work
 | 3 | Cockpit | Done — MapLibre, calibration, G-gauge, drive modes |
 | 4 | Afterglow | Done — summary, replay, WorkManager sync, trip ingest |
 | 5 | Engine of Want | Done — server XP/scores, achievements, challenges, Home hub |
-| 6–10 | … | Planned — see `plan/` |
+| 6 | Arena | Done — seasonal boards, friends, adventure map, privacy |
+| 7–10 | … | Planned — see `plan/` |
 
 ---
 
@@ -59,6 +60,15 @@ Android-first driving adventure — telemetry, ascent ranks, vehicle vault, work
 - Home game hub (XP bar motion, streak, next challenge); Summary provisional → server final
 - More: post-drive notification opt-ins (level / challenge / streak)
 
+## Phase 6 — Arena
+
+- Geo seed: Lahore → Punjab → Pakistan → Global; Ascent Season 1
+- Precomputed boards + reindex on trip finalize; friends board + follow
+- Home season rank chips; Arena UI (tabs, podium, YOU sticky, delta ▲▼)
+- Adventure map city % + geohash glow; privacy-safe share card
+- Leaderboard opt-out; Driving Mode hard-blocks boards/map
+- Ghost quality compare on repeat route; thin `GET/PATCH /v1/admin/flags`
+
 ---
 
 ## Run backend
@@ -69,6 +79,7 @@ npm install
 npm run start:dev
 # GET http://localhost:3000/health
 # POST http://localhost:3000/v1/trips  (Bearer meru_<userId>_…)
+# GET  http://localhost:3000/v1/leaderboards/city/pk-pb-lhr
 ```
 
 ## Run Android

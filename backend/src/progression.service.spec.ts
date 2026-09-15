@@ -1,4 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ArenaService } from './arena.service';
+import { AuthService } from './auth.service';
 import { ProgressionService } from './progression.service';
 import { TripsService } from './trips.controller';
 
@@ -8,7 +10,7 @@ describe('ProgressionService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ProgressionService, TripsService],
+      providers: [ProgressionService, ArenaService, AuthService, TripsService],
     }).compile();
     progression = module.get(ProgressionService);
     trips = module.get(TripsService);
@@ -32,7 +34,10 @@ describe('ProgressionService', () => {
         { ts: 4, type: 'BRAKING', label: 'hard', severity: 3 },
         { ts: 5, type: 'BRAKING', label: 'hard', severity: 3 },
       ],
-      locations: [{ ts: 1, lat: 1, lon: 2 }],
+      locations: [
+        { ts: 1, lat: 1, lon: 2 },
+        { ts: 2, lat: 1.01, lon: 2.01 },
+      ],
     });
 
     expect(spoofed.duplicated).toBe(false);
@@ -53,6 +58,10 @@ describe('ProgressionService', () => {
       pointCount: 20,
       newCells: 1,
       events: [] as { ts: number; type: string; label: string }[],
+      locations: [
+        { ts: 1, lat: 1, lon: 2 },
+        { ts: 2, lat: 1.01, lon: 2.01 },
+      ],
     };
     const a = trips.upsert('u2', body);
     const xp = progression.me('u2').xpTotal;

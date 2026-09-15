@@ -6,8 +6,10 @@ import {
   Post,
   UnauthorizedException,
 } from '@nestjs/common';
-import { randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 import { parseBearerUserId } from './auth.util';
+import { ArenaService } from './arena.service';
+import { AuthService } from './auth.service';
 import { ProgressionService } from './progression.service';
 import type { TripUpsertBody } from './trips.types';
 
@@ -23,7 +25,11 @@ export class TripsService {
   // ponytail: in-memory trip store; ceiling = lost on restart. Upgrade: Postgres trips.
   private readonly byClientId = new Map<string, StoredTrip>();
 
-  constructor(private readonly progression: ProgressionService) {}
+  constructor(
+    private readonly progression: ProgressionService,
+    private readonly arena: ArenaService,
+    private readonly auth: AuthService,
+  ) {}
 
   upsert(userId: string, body: TripUpsertBody) {
     const key = `${userId}:${body.clientTripId}`;
@@ -42,7 +48,6 @@ export class TripsService {
       };
     }
 
-    // Integrity from telemetry trust signals — not client qualityScore alone
     const pointCount = body.pointCount ?? body.locations?.length ?? 0;
     let integrity = 88;
     if (pointCount < 5) integrity -= 12;
@@ -62,12 +67,26 @@ export class TripsService {
     this.byClientId.set(key, stored);
 
     const awards = this.progression.finalizeTrip(userId, stored.id, body, integrity);
+    const displayName = this.auth.findDisplayName(userId) || 'Driver';
+    const routeHash = routeFingerprint(body);
+    const ghost = this.arena.ghostCompare(userId, routeHash, awards.qualityScore);
+    this.arena.onTripFinalized(
+      userId,
+      displayName,
+      awards.adventureScore,
+      awards.qualityScore,
+      body.newCells ?? 0,
+      awards.competitiveEligible,
+      routeHash,
+    );
+
     return {
       id: stored.id,
       clientTripId: stored.clientTripId,
       integrity: stored.integrity,
       duplicated: false,
       awards,
+      ghost,
     };
   }
 
@@ -96,4 +115,13 @@ export class TripsController {
     }
     return this.trips.upsert(userId, body);
   }
+}
+
+function routeFingerprint(body: TripUpsertBody): string | null {
+  const locs = body.locations ?? [];
+  if (locs.length < 2) return null;
+  const a = locs[0];
+  const b = locs[locs.length - 1];
+  const raw = `${a.lat.toFixed(3)},${a.lon.toFixed(3)}>${b.lat.toFixed(3)},${b.lon.toFixed(3)}`;
+  return createHash('sha256').update(raw).digest('hex').slice(0, 16);
 }

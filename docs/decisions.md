@@ -13,6 +13,13 @@
 
 ---
 
+## DEC-022 — Phase 6 Arena boards (pilot Lahore)
+- **Date:** 2026-09-15
+- **Status:** Accepted
+- **Decision:** Seasonal boards are precomputed in-memory for geo City(Lahore)/Province(Punjab)/Country(Pakistan)/Global. Reindex runs synchronously on trip finalize (DEC-011). Opt-out via `PATCH /v1/privacy/me` removes the user from visible entries. Driving Mode hard-blocks Arena/map UI. Redis/Postgres indexes deferred.
+- **Why:** Phase 6 exit criteria on budget path (no websocket).
+- **Consequences:** Bots seed empty boards for demo; friends board is follow-list sort.
+
 ## DEC-021 — Phase 5 server progression on trip finalize
 - **Date:** 2026-09-15
 - **Status:** Accepted

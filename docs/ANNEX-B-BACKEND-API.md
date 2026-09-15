@@ -60,9 +60,15 @@ Worker `trip.process`:
 |--------|------|-------|
 | GET | `/scores/me` | **Phase 5:** components + Adventure + Driver Rating + XP/level/title/streak |
 | GET | `/scores/config` | **Phase 5:** public weights version |
-| GET | `/leaderboards/{geoType}/{geoId}` | query: period, board, cursor — Phase 6 |
-| GET | `/seasons/current` | Phase 6 |
-| GET | `/friends/leaderboard` | Phase 6 |
+| GET | `/leaderboards/{geoType}/{geoId}` | **Phase 6:** season/week boards; query `period` |
+| GET | `/ranks/me` | **Phase 6:** 4 geo ranks for Home chips |
+| GET | `/seasons/current` | **Phase 6** |
+| GET | `/friends/leaderboard` | **Phase 6** |
+| POST/DELETE | `/friends/{id}/follow` | **Phase 6** |
+| GET | `/exploration/map` | **Phase 6** city % |
+| GET | `/share/card` | **Phase 6** privacy-safe |
+| GET/PATCH | `/privacy/me` | **Phase 6** board opt-in |
+| GET/PATCH | `/admin/flags` | **Phase 6** thin local admin |
 
 ## B.5 Challenges & achievements
 - **Phase 5:** `GET /achievements/me`, `GET /challenges`; evaluate on trip finalize (in-memory catalog).

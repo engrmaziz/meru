@@ -42,7 +42,7 @@ class TripSyncWorker @AssistedInject constructor(
                 val res = api.upsertTrip("Bearer $token", body)
                 res.awards?.let { awards ->
                     if (!res.duplicated) {
-                        progressionStore.applyAwards(awards)
+                        progressionStore.applyAwards(awards, res.ghost?.message)
                     }
                     // Overlay server quality onto local trip (provisional → final)
                     val trip = tripDao.getTrip(item.id)

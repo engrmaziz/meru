@@ -49,6 +49,20 @@ export class AuthService {
     return this.tokenResponse(user);
   }
 
+  findDisplayName(userId: string): string | null {
+    for (const u of this.users.values()) {
+      if (u.id === userId) return u.displayName;
+    }
+    return null;
+  }
+
+  findById(userId: string): UserRecord | null {
+    for (const u of this.users.values()) {
+      if (u.id === userId) return u;
+    }
+    return null;
+  }
+
   private tokenResponse(user: UserRecord) {
     return {
       accessToken: `meru_${user.id}_${randomUUID()}`,

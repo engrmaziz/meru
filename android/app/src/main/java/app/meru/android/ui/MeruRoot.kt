@@ -1,8 +1,12 @@
 package app.meru.android.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DirectionsCar
@@ -22,6 +26,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -38,6 +45,9 @@ import app.meru.android.core.designsystem.theme.MeruPanel
 import app.meru.android.core.designsystem.theme.MeruTeal
 import app.meru.android.core.designsystem.theme.MeruVoid
 import app.meru.android.engine.drive.DrivingMode
+import app.meru.android.feature.arena.AdventureMapScreen
+import app.meru.android.feature.arena.LeaderboardsScreen
+import app.meru.android.feature.arena.ShareCardScreen
 import app.meru.android.feature.auth.AuthScreen
 import app.meru.android.feature.calibration.CalibrationScreen
 import app.meru.android.feature.drive.DriveReadyScreen
@@ -116,7 +126,10 @@ private fun MainGraph(rootViewModel: RootViewModel) {
     val hideBottomBar = current?.startsWith("trip_") == true ||
         current == MeruRoute.Calibration.path ||
         current == MeruRoute.Achievements.path ||
-        current == MeruRoute.Challenges.path
+        current == MeruRoute.Challenges.path ||
+        current == MeruRoute.Leaderboards.path ||
+        current == MeruRoute.AdventureMap.path ||
+        current == MeruRoute.ShareCard.path
 
     Scaffold(
         containerColor = MeruVoid,
@@ -185,6 +198,13 @@ private fun MainGraph(rootViewModel: RootViewModel) {
                 HomeScreen(
                     onOpenAchievements = { navController.navigate(MeruRoute.Achievements.path) },
                     onOpenChallenges = { navController.navigate(MeruRoute.Challenges.path) },
+                    onOpenLeaderboards = {
+                        if (!driving) navController.navigate(MeruRoute.Leaderboards.path)
+                    },
+                    onOpenAdventureMap = {
+                        if (!driving) navController.navigate(MeruRoute.AdventureMap.path)
+                    },
+                    driving = driving,
                 )
             }
             composable(MeruRoute.Drive.path) {
@@ -206,6 +226,13 @@ private fun MainGraph(rootViewModel: RootViewModel) {
                     onOpenCalibration = { navController.navigate(MeruRoute.Calibration.path) },
                     onOpenAchievements = { navController.navigate(MeruRoute.Achievements.path) },
                     onOpenChallenges = { navController.navigate(MeruRoute.Challenges.path) },
+                    onOpenLeaderboards = {
+                        if (!driving) navController.navigate(MeruRoute.Leaderboards.path)
+                    },
+                    onOpenAdventureMap = {
+                        if (!driving) navController.navigate(MeruRoute.AdventureMap.path)
+                    },
+                    driving = driving,
                 )
             }
             composable(MeruRoute.Calibration.path) {
@@ -216,6 +243,27 @@ private fun MainGraph(rootViewModel: RootViewModel) {
             }
             composable(MeruRoute.Challenges.path) {
                 ChallengesScreen(onBack = { navController.popBackStack() })
+            }
+            composable(MeruRoute.Leaderboards.path) {
+                if (driving) {
+                    LockedBoardsPlaceholder(onBack = { navController.popBackStack() })
+                } else {
+                    LeaderboardsScreen(
+                        onBack = { navController.popBackStack() },
+                        onOpenAdventureMap = { navController.navigate(MeruRoute.AdventureMap.path) },
+                        onOpenShare = { navController.navigate(MeruRoute.ShareCard.path) },
+                    )
+                }
+            }
+            composable(MeruRoute.AdventureMap.path) {
+                if (driving) {
+                    LockedBoardsPlaceholder(onBack = { navController.popBackStack() })
+                } else {
+                    AdventureMapScreen(onBack = { navController.popBackStack() })
+                }
+            }
+            composable(MeruRoute.ShareCard.path) {
+                ShareCardScreen(onBack = { navController.popBackStack() })
             }
             composable(
                 route = MeruRoute.TripProcessing.path,
@@ -251,6 +299,35 @@ private fun MainGraph(rootViewModel: RootViewModel) {
             ) {
                 TripDetailScreen(onBack = { navController.popBackStack() })
             }
+        }
+    }
+}
+
+@Composable
+private fun LockedBoardsPlaceholder(onBack: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MeruVoid)
+            .padding(24.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text("Driving Mode", color = MeruTeal, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                "Leaderboards and adventure map stay locked until you end the drive.",
+                color = MeruMuted,
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(
+                "Back",
+                color = MeruTeal,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier
+                    .clickable(onClick = onBack)
+                    .padding(12.dp),
+            )
         }
     }
 }

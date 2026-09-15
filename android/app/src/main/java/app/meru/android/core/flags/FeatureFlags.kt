@@ -13,10 +13,10 @@ import kotlinx.coroutines.flow.asStateFlow
 class FeatureFlags @Inject constructor() {
     private val _flags = MutableStateFlow(
         MeruFlags(
-            s2Leaderboards = false,
+            s2Leaderboards = true,
             s3Garage = true,
             s4Marketplace = false,
-            ghostDriver = false,
+            ghostDriver = true,
         ),
     )
     val flags: StateFlow<MeruFlags> = _flags.asStateFlow()

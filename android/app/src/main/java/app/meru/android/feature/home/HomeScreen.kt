@@ -48,6 +48,7 @@ import app.meru.android.core.designsystem.theme.MeruText
 import app.meru.android.core.designsystem.theme.MeruVoid
 import app.meru.android.core.network.ChallengeItemDto
 import app.meru.android.core.network.MeruApi
+import app.meru.android.core.network.RankChipDto
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.Locale
 import javax.inject.Inject
@@ -91,6 +92,9 @@ class HomeViewModel @Inject constructor(
     private val _challenge = MutableStateFlow<ChallengeItemDto?>(null)
     val challenge: StateFlow<ChallengeItemDto?> = _challenge.asStateFlow()
 
+    private val _ranks = MutableStateFlow<List<RankChipDto>>(emptyList())
+    val ranks: StateFlow<List<RankChipDto>> = _ranks.asStateFlow()
+
     private val _refreshError = MutableStateFlow<String?>(null)
     val refreshError: StateFlow<String?> = _refreshError.asStateFlow()
 
@@ -116,6 +120,7 @@ class HomeViewModel @Inject constructor(
                 progressionStore.applyScores(me)
                 val challenges = api.challenges("Bearer $token").items
                 _challenge.value = challenges.firstOrNull { !it.completed } ?: challenges.firstOrNull()
+                _ranks.value = api.ranksMe("Bearer $token").ranks
                 _refreshError.value = null
             }.onFailure {
                 _refreshError.value = "Offline — showing cached ascent"
@@ -128,12 +133,16 @@ class HomeViewModel @Inject constructor(
 fun HomeScreen(
     onOpenAchievements: () -> Unit = {},
     onOpenChallenges: () -> Unit = {},
+    onOpenLeaderboards: () -> Unit = {},
+    onOpenAdventureMap: () -> Unit = {},
+    driving: Boolean = false,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val session by viewModel.session.collectAsState()
     val progression by viewModel.progression.collectAsState()
     val local by viewModel.local.collectAsState()
     val challenge by viewModel.challenge.collectAsState()
+    val ranks by viewModel.ranks.collectAsState()
     val refreshError by viewModel.refreshError.collectAsState()
     val name = session?.displayName ?: "Driver"
     val a11y = LocalAccessibilityManager.current
@@ -257,6 +266,47 @@ fun HomeScreen(
         }
 
         Spacer(Modifier.height(12.dp))
+        if (ranks.isNotEmpty()) {
+            Text("SEASON RANKS", color = MeruMuted, fontSize = 11.sp, letterSpacing = 1.sp)
+            Spacer(Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                ranks.take(4).forEach { r ->
+                    val delta = when {
+                        r.delta > 0 -> "▲${r.delta}"
+                        r.delta < 0 -> "▼${-r.delta}"
+                        else -> ""
+                    }
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MeruElevated)
+                            .clickable(enabled = !driving, onClick = onOpenLeaderboards)
+                            .padding(10.dp),
+                    ) {
+                        Text(r.geoType.take(4).uppercase(Locale.US), color = MeruMuted, fontSize = 10.sp)
+                        Text(
+                            r.rank?.let { "#$it" } ?: "—",
+                            color = MeruTeal,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                        )
+                        if (delta.isNotEmpty()) {
+                            Text(delta, color = MeruAmber, fontSize = 10.sp)
+                        }
+                    }
+                }
+            }
+            if (driving) {
+                Spacer(Modifier.height(4.dp))
+                Text("Boards locked while driving", color = MeruAmber, fontSize = 11.sp)
+            }
+            Spacer(Modifier.height(12.dp))
+        }
+
         challenge?.let { c ->
             Column(
                 modifier = Modifier
@@ -306,6 +356,19 @@ fun HomeScreen(
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
             HubLink(Modifier.weight(1f), "Achievements", onOpenAchievements)
             HubLink(Modifier.weight(1f), "Challenges", onOpenChallenges)
+        }
+        Spacer(Modifier.height(12.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+            HubLink(
+                Modifier.weight(1f),
+                if (driving) "Arena locked" else "Arena",
+                onClick = { if (!driving) onOpenLeaderboards() },
+            )
+            HubLink(
+                Modifier.weight(1f),
+                if (driving) "Map locked" else "Adventure map",
+                onClick = { if (!driving) onOpenAdventureMap() },
+            )
         }
 
         Spacer(Modifier.height(24.dp))

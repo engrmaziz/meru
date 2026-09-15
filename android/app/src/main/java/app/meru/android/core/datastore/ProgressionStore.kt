@@ -49,6 +49,7 @@ class ProgressionStore @Inject constructor(
             lastAwards = awardsJson?.let {
                 runCatching { json.decodeFromString(TripAwardsDto.serializer(), it) }.getOrNull()
             },
+            lastGhostMessage = prefs[Keys.GHOST],
         )
     }
 
@@ -73,9 +74,10 @@ class ProgressionStore @Inject constructor(
         }
     }
 
-    suspend fun applyAwards(awards: TripAwardsDto) {
+    suspend fun applyAwards(awards: TripAwardsDto, ghostMessage: String? = null) {
         dataStore.edit { prefs ->
             prefs[Keys.LAST_AWARDS] = json.encodeToString(TripAwardsDto.serializer(), awards)
+            ghostMessage?.let { prefs[Keys.GHOST] = it }
             prefs[Keys.LEVEL] = awards.level
             prefs[Keys.TITLE] = awards.title
             prefs[Keys.STREAK] = awards.streakDays
@@ -121,6 +123,7 @@ class ProgressionStore @Inject constructor(
         val NOTIF_LEVEL = booleanPreferencesKey("notif_level")
         val NOTIF_CHALLENGE = booleanPreferencesKey("notif_challenge")
         val NOTIF_STREAK = booleanPreferencesKey("notif_streak")
+        val GHOST = stringPreferencesKey("ghost_msg")
     }
 }
 
@@ -142,4 +145,5 @@ data class ProgressionSnapshot(
     val notifChallenge: Boolean = true,
     val notifStreak: Boolean = true,
     val lastAwards: TripAwardsDto? = null,
+    val lastGhostMessage: String? = null,
 )

@@ -105,6 +105,10 @@ class TripDetailViewModel @Inject constructor(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
+    val ghostMessage: StateFlow<String?> = progressionStore.snapshot
+        .map { it.lastGhostMessage }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
     init {
         viewModelScope.launch {
             val trip = tripDao.getTrip(tripId)
@@ -179,6 +183,7 @@ fun TripSummaryScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val awards by viewModel.serverAwards.collectAsState()
+    val ghostMsg by viewModel.ghostMessage.collectAsState()
     val trip = state.trip
 
     if (state.loading || trip == null) {
@@ -268,6 +273,19 @@ fun TripSummaryScreen(
                     )
                 }
             }
+        }
+
+        ghostMsg?.let { msg ->
+            Text(
+                msg,
+                color = MeruCyan,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MeruElevated)
+                    .padding(12.dp),
+            )
         }
 
         if (trip.newCells > 0) {

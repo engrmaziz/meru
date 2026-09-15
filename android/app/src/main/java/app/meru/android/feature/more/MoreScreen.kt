@@ -14,6 +14,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -28,14 +29,21 @@ import app.meru.android.core.datastore.ProgressionSnapshot
 import app.meru.android.core.datastore.ProgressionStore
 import app.meru.android.core.datastore.SessionStore
 import app.meru.android.core.designsystem.components.MeruSecondaryButton
+import app.meru.android.core.designsystem.theme.MeruAmber
 import app.meru.android.core.designsystem.theme.MeruMuted
 import app.meru.android.core.designsystem.theme.MeruTeal
 import app.meru.android.core.designsystem.theme.MeruText
 import app.meru.android.core.designsystem.theme.MeruVoid
+import app.meru.android.core.network.MeruApi
+import app.meru.android.core.network.PrivacyPatchRequest
 import app.meru.android.engine.sensors.CalibrationStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -44,12 +52,37 @@ class MoreViewModel @Inject constructor(
     private val sessionStore: SessionStore,
     private val calibrationStore: CalibrationStore,
     private val progressionStore: ProgressionStore,
+    private val api: MeruApi,
 ) : ViewModel() {
     val progression = progressionStore.snapshot.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5_000),
         ProgressionSnapshot(),
     )
+
+    private val _boardOptIn = MutableStateFlow(true)
+    val boardOptIn: StateFlow<Boolean> = _boardOptIn.asStateFlow()
+
+    fun refreshPrivacy() {
+        viewModelScope.launch {
+            val token = sessionStore.session.first().accessToken ?: return@launch
+            runCatching {
+                _boardOptIn.value = api.privacyMe("Bearer $token").boardOptIn
+            }
+        }
+    }
+
+    fun setBoardOptIn(optIn: Boolean) {
+        viewModelScope.launch {
+            val token = sessionStore.session.first().accessToken ?: return@launch
+            runCatching {
+                _boardOptIn.value = api.privacyPatch(
+                    "Bearer $token",
+                    PrivacyPatchRequest(boardOptIn = optIn),
+                ).boardOptIn
+            }
+        }
+    }
 
     fun signOut() {
         viewModelScope.launch { sessionStore.clear() }
@@ -69,10 +102,16 @@ fun MoreScreen(
     onOpenCalibration: () -> Unit,
     onOpenAchievements: () -> Unit = {},
     onOpenChallenges: () -> Unit = {},
+    onOpenLeaderboards: () -> Unit = {},
+    onOpenAdventureMap: () -> Unit = {},
+    driving: Boolean = false,
     viewModel: MoreViewModel = hiltViewModel(),
 ) {
     val scope = rememberCoroutineScope()
     val progression by viewModel.progression.collectAsState()
+    val boardOptIn by viewModel.boardOptIn.collectAsState()
+    LaunchedEffect(Unit) { viewModel.refreshPrivacy() }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -83,7 +122,21 @@ fun MoreScreen(
         Text("More", color = MeruText, fontSize = 28.sp)
         Spacer(modifier = Modifier.height(8.dp))
         Text("Cockpit settings for Meru.", color = MeruMuted)
+        if (driving) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text("Driving Mode — Arena locked", color = MeruAmber, fontSize = 13.sp)
+        }
         Spacer(modifier = Modifier.height(24.dp))
+        MeruSecondaryButton(
+            text = if (driving) "Arena (locked)" else "Arena boards",
+            onClick = { if (!driving) onOpenLeaderboards() },
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        MeruSecondaryButton(
+            text = if (driving) "Adventure map (locked)" else "Adventure map",
+            onClick = { if (!driving) onOpenAdventureMap() },
+        )
+        Spacer(modifier = Modifier.height(12.dp))
         MeruSecondaryButton(text = "Achievements", onClick = onOpenAchievements)
         Spacer(modifier = Modifier.height(12.dp))
         MeruSecondaryButton(text = "Challenges", onClick = onOpenChallenges)
@@ -94,6 +147,11 @@ fun MoreScreen(
             text = "Clear calibration",
             onClick = { scope.launch { viewModel.clearCalibration() } },
         )
+
+        Spacer(modifier = Modifier.height(28.dp))
+        Text("Leaderboard privacy", color = MeruText, fontSize = 16.sp)
+        Spacer(modifier = Modifier.height(8.dp))
+        NotifRow("Show me on boards", boardOptIn) { viewModel.setBoardOptIn(it) }
 
         Spacer(modifier = Modifier.height(28.dp))
         Text("Notifications (post-drive only)", color = MeruText, fontSize = 16.sp)

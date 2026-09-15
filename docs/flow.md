@@ -54,7 +54,8 @@ Home / Drive Ready
  → WorkManager sync → POST /v1/trips (idempotent clientTripId) when online
  → Server ProgressionService: integrity + Quality/Exploration/Activity + XP/achievements/challenges
  → Client Summary shows provisional then overlays awards; Home refreshes scores/me
- → Home hub: XP bar, Adventure vs Driver Rating, streak, next challenge
+ → Home hub: XP bar, Adventure vs Driver Rating, streak, next challenge, season rank chips
+ → Arena boards (city→global) when not driving; adventure map city %
 ```
 
 ### Mid-drive safety lock
