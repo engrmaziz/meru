@@ -5,8 +5,10 @@ import app.meru.android.core.database.PendingSyncEntity
 import app.meru.android.core.database.TripDao
 import app.meru.android.core.database.TripEntity
 import app.meru.android.core.database.TripLocationEntity
+import app.meru.android.engine.sensors.MotionEngine
 import app.meru.android.engine.telemetry.GpsSample
 import app.meru.android.engine.telemetry.LiveTelemetry
+import app.meru.android.engine.telemetry.RoutePoint
 import app.meru.android.engine.telemetry.TelemetryAccumulator
 import java.util.UUID
 import javax.inject.Inject
@@ -23,12 +25,16 @@ class DriveSessionController @Inject constructor(
     private val tripDao: TripDao,
     private val pendingSyncDao: PendingSyncDao,
     private val drivingMode: DrivingMode,
+    private val motionEngine: MotionEngine,
 ) {
     private val mutex = Mutex()
     private val accumulator = TelemetryAccumulator()
 
     private val _telemetry = MutableStateFlow(LiveTelemetry())
     val telemetry: StateFlow<LiveTelemetry> = _telemetry.asStateFlow()
+
+    private val _route = MutableStateFlow<List<RoutePoint>>(emptyList())
+    val route: StateFlow<List<RoutePoint>> = _route.asStateFlow()
 
     val isActive: Boolean get() = _telemetry.value.active
 
@@ -46,7 +52,9 @@ class DriveSessionController @Inject constructor(
             ),
         )
         accumulator.start(tripId, start)
+        _route.value = emptyList()
         drivingMode.setActive(true)
+        motionEngine.start()
         _telemetry.value = accumulator.snapshot(start)
         tripId
     }
@@ -67,18 +75,27 @@ class DriveSessionController @Inject constructor(
                     accuracyM = sample.accuracyM,
                 ),
             )
+            _route.value = accumulator.routePoints()
         }
         _telemetry.value = accumulator.snapshot(sample.timestampMs)
+    }
+
+    fun markPermissionLost(lost: Boolean) {
+        val cur = _telemetry.value
+        if (cur.active) {
+            _telemetry.value = cur.copy(permissionLost = lost)
+        }
     }
 
     suspend fun endDrive(): TripEntity? = mutex.withLock {
         val snap = accumulator.snapshot()
         val tripId = snap.tripId ?: return@withLock null
         val end = System.currentTimeMillis()
+        val existing = tripDao.getTrip(tripId)
         val completed = TripEntity(
             id = tripId,
-            vehicleId = tripDao.getTrip(tripId)?.vehicleId,
-            startAtMs = tripDao.getTrip(tripId)?.startAtMs ?: (end - snap.durationMs),
+            vehicleId = existing?.vehicleId,
+            startAtMs = existing?.startAtMs ?: (end - snap.durationMs),
             endAtMs = end,
             distanceM = snap.distanceM,
             durationMs = snap.durationMs,
@@ -100,15 +117,19 @@ class DriveSessionController @Inject constructor(
                     .toString(),
             ),
         )
+        motionEngine.stop()
         accumulator.reset()
         drivingMode.setActive(false)
+        _route.value = emptyList()
         _telemetry.value = LiveTelemetry()
         completed
     }
 
     fun publishTick(nowMs: Long = System.currentTimeMillis()) {
         if (_telemetry.value.active) {
-            _telemetry.value = accumulator.snapshot(nowMs)
+            _telemetry.value = accumulator.snapshot(nowMs).copy(
+                permissionLost = _telemetry.value.permissionLost,
+            )
         }
     }
 }

@@ -8,6 +8,7 @@ sealed class MeruRoute(val path: String) {
     data object Trips : MeruRoute("trips")
     data object Garage : MeruRoute("garage")
     data object More : MeruRoute("more")
+    data object Calibration : MeruRoute("calibration")
 }
 
 val mainTabs = listOf(

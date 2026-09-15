@@ -29,26 +29,40 @@
 - **Band / slice:** Phase 1 / Foundation
 - **Agent:** Cursor agent (commits as engrmaziz)
 - **Ponytail rung used:** minimum (scaffold) + YAGNI (in-memory auth)
-- **Context7 libs:** n/a (session Stitch/Context7 MCP not loaded)
+- **Context7 libs:** n/a
 - **Stitch screens:** manual Compose Welcome / Home / Drive Ready (Meru tokens)
 - **DEC referenced:** DEC-016, DEC-017, DEC-018
-- **What shipped:** Android Compose shell + Hilt/Room/DataStore/Retrofit; NestJS `/health` + `/v1/auth`; docker-compose Postgres/Redis; CI backend job; git author rule
-- **What deferred (ponytail:):** Postgres-backed users; real Google Sign-In SDK; Android CI job until SDK on runner; Stitch MCP generation when MCP available
-- **Gamify/motion added:** Home XP bar shell placeholder
-- **Tests:** backend AuthService unit tests + build
+- **What shipped:** Android Compose shell + Hilt/Room/DataStore/Retrofit; NestJS `/health` + `/v1/auth`; docker-compose; CI
+- **What deferred (ponytail:):** Postgres users; real Google Sign-In; Android CI without SDK
+- **Gamify/motion added:** Home XP bar placeholder
+- **Tests:** backend AuthService unit tests
 - **Strix:** skipped
-- **Follow-ups:** Phase 2 driving engine; install Android SDK locally to assemble APK
+- **Follow-ups:** Phase 2
 
 ### 2026-09-15 — Phase 2 Pulse driving engine
 - **Band / slice:** Phase 2 / Drive engine
 - **Agent:** Cursor agent (commits as engrmaziz)
 - **Ponytail rung used:** minimum + platform (Fused Location / FG service)
-- **Context7 libs:** n/a (MCP not loaded this session)
-- **Stitch screens:** n/a (functional Drive UI only)
+- **Context7 libs:** n/a
+- **Stitch screens:** n/a
 - **DEC referenced:** DEC-017, DEC-018
-- **What shipped:** JumpFilter + GeoMath + TelemetryAccumulator; Room trips/locations; DriveSessionController; DriveForegroundService; permission primer; Drive start/end; local Trips list; DrivingMode locks More tab; unit tests for distance/jumps
-- **What deferred (ponytail:):** MapLibre UI, sensors/G-force, server trip sync, adaptive interval when stationary
+- **What shipped:** JumpFilter + TelemetryAccumulator; Room trips; FG service; Trips list; DrivingMode
+- **What deferred (ponytail:):** MapLibre, sensors, server sync
 - **Gamify/motion added:** n/a (Drive-safe)
-- **Tests:** JVM unit tests in `TelemetryUnitTest.kt` (run when Android SDK present)
+- **Tests:** TelemetryUnitTest
 - **Strix:** skipped
-- **Follow-ups:** Phase 3 cockpit polish + maps + sensors
+- **Follow-ups:** Phase 3
+
+### 2026-09-15 — Phase 3 Cockpit live drive UI
+- **Band / slice:** Phase 3 / Cockpit
+- **Agent:** Cursor agent (commits as engrmaziz only)
+- **Ponytail rung used:** platform (MapLibre MapView) + minimum motion projection
+- **Context7 libs:** n/a
+- **Stitch screens:** Compose Drive modes hand-built to Meru tokens (calm)
+- **DEC referenced:** DEC-008, DEC-017, DEC-018, DEC-019
+- **What shipped:** MapLibre live route + bearing; phone calibration; MotionEngine G-gauge; Minimal/Detailed/Performance/HUD; weak GPS / permission banners; expand map; More → Calibrate
+- **What deferred (ponytail:):** full IMU fusion, custom dark tiles, Stitch MCP iteration
+- **Gamify/motion added:** none mid-drive
+- **Tests:** MotionMathTest
+- **Strix:** skipped
+- **Follow-ups:** Phase 4 trip summary / replay / sync

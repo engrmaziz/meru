@@ -10,9 +10,17 @@ data class LiveTelemetry(
     val durationMs: Long = 0L,
     val latitude: Double? = null,
     val longitude: Double? = null,
+    val altitudeM: Double? = null,
+    val bearing: Float? = null,
     val pointCount: Int = 0,
     val rejectedJumps: Int = 0,
     val gpsWeak: Boolean = false,
+    val permissionLost: Boolean = false,
+)
+
+data class RoutePoint(
+    val latitude: Double,
+    val longitude: Double,
 )
 
 class TelemetryAccumulator(
@@ -28,6 +36,7 @@ class TelemetryAccumulator(
     private var pointCount: Int = 0
     private var rejectedJumps: Int = 0
     private var latest: GpsSample? = null
+    private val route = mutableListOf<RoutePoint>()
 
     fun start(tripId: String, startedAtMs: Long) {
         reset()
@@ -46,9 +55,11 @@ class TelemetryAccumulator(
         pointCount = 0
         rejectedJumps = 0
         latest = null
+        route.clear()
     }
 
-    /** @return true if sample was accepted into the distance chain */
+    fun routePoints(): List<RoutePoint> = route.toList()
+
     fun onSample(sample: GpsSample): Boolean {
         latest = sample
         if (!jumpFilter.accept(lastAccepted, sample)) {
@@ -65,6 +76,7 @@ class TelemetryAccumulator(
         }
         lastAccepted = sample
         pointCount++
+        route.add(RoutePoint(sample.latitude, sample.longitude))
 
         val speedKmh = when {
             sample.speedMps != null && sample.speedMps >= 0 ->
@@ -93,6 +105,8 @@ class TelemetryAccumulator(
             durationMs = duration,
             latitude = sample?.latitude,
             longitude = sample?.longitude,
+            altitudeM = sample?.altitudeM,
+            bearing = sample?.bearing,
             pointCount = pointCount,
             rejectedJumps = rejectedJumps,
             gpsWeak = weak,

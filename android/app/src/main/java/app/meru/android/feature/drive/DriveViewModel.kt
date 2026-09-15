@@ -10,13 +10,18 @@ import androidx.lifecycle.viewModelScope
 import app.meru.android.core.database.TripEntity
 import app.meru.android.engine.drive.DriveForegroundService
 import app.meru.android.engine.drive.DriveSessionController
+import app.meru.android.engine.sensors.CalibrationStore
+import app.meru.android.engine.sensors.MotionEngine
+import app.meru.android.engine.sensors.MotionSample
 import app.meru.android.engine.telemetry.LiveTelemetry
+import app.meru.android.engine.telemetry.RoutePoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -24,25 +29,42 @@ data class DriveUiState(
     val mode: String = "Detailed",
     val needsLocationPermission: Boolean = true,
     val needsNotificationPermission: Boolean = false,
+    val calibrated: Boolean = false,
     val error: String? = null,
     val lastCompleted: TripEntity? = null,
     val confirmEnd: Boolean = false,
+    val mapExpanded: Boolean = false,
 )
 
 @HiltViewModel
 class DriveViewModel @Inject constructor(
     application: Application,
     private val session: DriveSessionController,
+    motionEngine: MotionEngine,
+    calibrationStore: CalibrationStore,
 ) : AndroidViewModel(application) {
 
     val telemetry: StateFlow<LiveTelemetry> = session.telemetry
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), LiveTelemetry())
+
+    val route: StateFlow<List<RoutePoint>> = session.route
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val motion: StateFlow<MotionSample> = motionEngine.motion
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), MotionSample())
 
     private val _ui = MutableStateFlow(DriveUiState())
     val ui: StateFlow<DriveUiState> = _ui.asStateFlow()
 
     init {
         refreshPermissions()
+        viewModelScope.launch {
+            calibrationStore.profile
+                .map { it != null }
+                .collect { calibrated ->
+                    _ui.value = _ui.value.copy(calibrated = calibrated)
+                }
+        }
     }
 
     fun refreshPermissions() {
@@ -52,6 +74,7 @@ class DriveViewModel @Inject constructor(
         val notifNeeded = Build.VERSION.SDK_INT >= 33 &&
             ContextCompat.checkSelfPermission(ctx, Manifest.permission.POST_NOTIFICATIONS) !=
             PackageManager.PERMISSION_GRANTED
+        session.markPermissionLost(!fine && telemetry.value.active)
         _ui.value = _ui.value.copy(
             needsLocationPermission = !fine,
             needsNotificationPermission = notifNeeded,
@@ -60,6 +83,10 @@ class DriveViewModel @Inject constructor(
 
     fun setMode(mode: String) {
         _ui.value = _ui.value.copy(mode = mode)
+    }
+
+    fun toggleMapExpanded() {
+        _ui.value = _ui.value.copy(mapExpanded = !_ui.value.mapExpanded)
     }
 
     fun startDrive() {
@@ -94,9 +121,5 @@ class DriveViewModel @Inject constructor(
             )
             _ui.value = _ui.value.copy(confirmEnd = false, lastCompleted = completed, error = null)
         }
-    }
-
-    fun clearError() {
-        _ui.value = _ui.value.copy(error = null)
     }
 }

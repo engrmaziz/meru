@@ -37,6 +37,7 @@ import app.meru.android.core.designsystem.theme.MeruTeal
 import app.meru.android.core.designsystem.theme.MeruVoid
 import app.meru.android.engine.drive.DrivingMode
 import app.meru.android.feature.auth.AuthScreen
+import app.meru.android.feature.calibration.CalibrationScreen
 import app.meru.android.feature.drive.DriveReadyScreen
 import app.meru.android.feature.garage.GarageStubScreen
 import app.meru.android.feature.home.HomeScreen
@@ -168,10 +169,21 @@ private fun MainGraph(rootViewModel: RootViewModel) {
             modifier = Modifier.padding(padding),
         ) {
             composable(MeruRoute.Home.path) { HomeScreen() }
-            composable(MeruRoute.Drive.path) { DriveReadyScreen() }
+            composable(MeruRoute.Drive.path) {
+                DriveReadyScreen(
+                    onOpenCalibration = { navController.navigate(MeruRoute.Calibration.path) },
+                )
+            }
             composable(MeruRoute.Trips.path) { TripsListScreen() }
             composable(MeruRoute.Garage.path) { GarageStubScreen() }
-            composable(MeruRoute.More.path) { MoreScreen() }
+            composable(MeruRoute.More.path) {
+                MoreScreen(
+                    onOpenCalibration = { navController.navigate(MeruRoute.Calibration.path) },
+                )
+            }
+            composable(MeruRoute.Calibration.path) {
+                CalibrationScreen(onBack = { navController.popBackStack() })
+            }
         }
     }
 }

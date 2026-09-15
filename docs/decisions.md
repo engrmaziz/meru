@@ -13,6 +13,11 @@
 
 ---
 
+## DEC-019 — Commit & push after every phase
+- **Date:** 2026-09-15
+- **Status:** Accepted
+- **Decision:** On completion of each `plan/N` phase, create a git commit and push to `origin` immediately. Author/committer must remain **engrmaziz** / Musharraf Aziz `<io@maziz.me>` with **no** Cursor co-author trailers (extends DEC-018).
+
 ## DEC-018 — GitHub commits as engrmaziz only
 - **Date:** 2026-09-15
 - **Status:** Accepted

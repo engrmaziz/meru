@@ -20,6 +20,7 @@ import app.meru.android.core.designsystem.components.MeruSecondaryButton
 import app.meru.android.core.designsystem.theme.MeruMuted
 import app.meru.android.core.designsystem.theme.MeruText
 import app.meru.android.core.designsystem.theme.MeruVoid
+import app.meru.android.engine.sensors.CalibrationStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.launch
@@ -27,14 +28,20 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class MoreViewModel @Inject constructor(
     private val sessionStore: SessionStore,
+    private val calibrationStore: CalibrationStore,
 ) : ViewModel() {
     fun signOut() {
         viewModelScope.launch { sessionStore.clear() }
+    }
+
+    fun clearCalibration() {
+        viewModelScope.launch { calibrationStore.clear() }
     }
 }
 
 @Composable
 fun MoreScreen(
+    onOpenCalibration: () -> Unit,
     viewModel: MoreViewModel = hiltViewModel(),
 ) {
     val scope = rememberCoroutineScope()
@@ -45,9 +52,16 @@ fun MoreScreen(
             .padding(20.dp),
     ) {
         Text("More", color = MeruText, fontSize = 28.sp)
-        Spacer(Modifier.height(8.dp))
-        Text("Leaderboards, challenges, and settings land in later phases.", color = MeruMuted)
-        Spacer(Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(8.dp))
+        Text("Cockpit settings for Meru.", color = MeruMuted)
+        Spacer(modifier = Modifier.height(24.dp))
+        MeruSecondaryButton(text = "Calibrate phone", onClick = onOpenCalibration)
+        Spacer(modifier = Modifier.height(12.dp))
+        MeruSecondaryButton(
+            text = "Clear calibration",
+            onClick = { scope.launch { viewModel.clearCalibration() } },
+        )
+        Spacer(modifier = Modifier.height(12.dp))
         MeruSecondaryButton(
             text = "Sign out",
             onClick = { scope.launch { viewModel.signOut() } },
