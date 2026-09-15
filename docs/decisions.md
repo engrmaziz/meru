@@ -13,6 +13,13 @@
 
 ---
 
+## DEC-024 — Phase 8 Bay holds (in-memory NX EX 120)
+- **Date:** 2026-09-15
+- **Status:** Accepted
+- **Decision:** Workshop discovery ranks brandFit → distance → rating. Slot exclusivity uses in-memory hold map (`NX EX 120` equivalent). `POST /v1/bookings` validates or auto-creates a Phase 7 history share, then confirms. Seed 5 Lahore workshops. Driving Mode locks Bay booking UI. Staff web / invoices deferred to Phase 9.
+- **Why:** Phase 8 exit (Audi rank, no double-book, hold expiry, share attach) without Redis yet.
+- **Consequences:** Multi-instance API needs real Redis + Postgres unique(slotId); notifications are in-memory stubs.
+
 ## DEC-023 — Phase 7 vault entitlement + share primitive
 - **Date:** 2026-09-15
 - **Status:** Accepted

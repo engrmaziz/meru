@@ -24,6 +24,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -44,11 +47,16 @@ import app.meru.android.core.designsystem.theme.MeruMuted
 import app.meru.android.core.designsystem.theme.MeruPanel
 import app.meru.android.core.designsystem.theme.MeruTeal
 import app.meru.android.core.designsystem.theme.MeruVoid
+import app.meru.android.core.network.BookingDto
 import app.meru.android.engine.drive.DrivingMode
 import app.meru.android.feature.arena.AdventureMapScreen
 import app.meru.android.feature.arena.LeaderboardsScreen
 import app.meru.android.feature.arena.ShareCardScreen
 import app.meru.android.feature.auth.AuthScreen
+import app.meru.android.feature.bay.BookingConfirmedScreen
+import app.meru.android.feature.bay.MyBookingsScreen
+import app.meru.android.feature.bay.WorkshopDetailScreen
+import app.meru.android.feature.bay.WorkshopsScreen
 import app.meru.android.feature.calibration.CalibrationScreen
 import app.meru.android.feature.drive.DriveReadyScreen
 import app.meru.android.feature.garage.AddServiceScreen
@@ -137,7 +145,13 @@ private fun MainGraph(rootViewModel: RootViewModel) {
         current == MeruRoute.AddVehicle.path ||
         current == MeruRoute.VehiclePaywall.path ||
         current?.startsWith("vehicle_timeline") == true ||
-        current?.startsWith("add_service") == true
+        current?.startsWith("add_service") == true ||
+        current == MeruRoute.Workshops.path ||
+        current == MeruRoute.MyBookings.path ||
+        current?.startsWith("workshop/") == true ||
+        current == MeruRoute.BookingConfirmed.path
+
+    var lastBooking by remember { mutableStateOf<BookingDto?>(null) }
 
     Scaffold(
         containerColor = MeruVoid,
@@ -246,6 +260,12 @@ private fun MainGraph(rootViewModel: RootViewModel) {
                     onOpenAdventureMap = {
                         if (!driving) navController.navigate(MeruRoute.AdventureMap.path)
                     },
+                    onOpenWorkshops = {
+                        if (!driving) navController.navigate(MeruRoute.Workshops.path)
+                    },
+                    onOpenBookings = {
+                        if (!driving) navController.navigate(MeruRoute.MyBookings.path)
+                    },
                     driving = driving,
                 )
             }
@@ -278,6 +298,46 @@ private fun MainGraph(rootViewModel: RootViewModel) {
             }
             composable(MeruRoute.ShareCard.path) {
                 ShareCardScreen(onBack = { navController.popBackStack() })
+            }
+            composable(MeruRoute.Workshops.path) {
+                WorkshopsScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenWorkshop = { id -> navController.navigate(MeruRoute.WorkshopDetail.create(id)) },
+                    onOpenBookings = { navController.navigate(MeruRoute.MyBookings.path) },
+                    driving = driving,
+                )
+            }
+            composable(MeruRoute.MyBookings.path) {
+                MyBookingsScreen(
+                    onBack = { navController.popBackStack() },
+                    driving = driving,
+                )
+            }
+            composable(
+                route = MeruRoute.WorkshopDetail.path,
+                arguments = listOf(navArgument("workshopId") { type = NavType.StringType }),
+            ) {
+                WorkshopDetailScreen(
+                    onBack = { navController.popBackStack() },
+                    onBooked = { booking ->
+                        lastBooking = booking
+                        navController.navigate(MeruRoute.BookingConfirmed.path)
+                    },
+                    driving = driving,
+                )
+            }
+            composable(MeruRoute.BookingConfirmed.path) {
+                val booking = lastBooking
+                if (booking != null) {
+                    BookingConfirmedScreen(
+                        booking = booking,
+                        onDone = {
+                            navController.navigate(MeruRoute.MyBookings.path) {
+                                popUpTo(MeruRoute.Workshops.path) { inclusive = false }
+                            }
+                        },
+                    )
+                }
             }
             composable(MeruRoute.AddVehicle.path) {
                 AddVehicleScreen(

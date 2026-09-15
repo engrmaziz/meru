@@ -469,6 +469,106 @@ data class ServiceTypeDto(
     val category: String = "other",
 )
 
+@Serializable
+data class WorkshopsListResponse(
+    val items: List<WorkshopDto> = emptyList(),
+)
+
+@Serializable
+data class WorkshopDto(
+    val id: String,
+    val name: String,
+    val kind: String = "general",
+    val brands: List<String> = emptyList(),
+    val cityId: String = "",
+    val lat: Double = 0.0,
+    val lon: Double = 0.0,
+    val rating: Double = 0.0,
+    val jobsCompleted: Int = 0,
+    val kycStatus: String = "pending",
+    val verified: Boolean = false,
+    val description: String = "",
+    val distanceKm: Double = 0.0,
+    val brandFit: Int = 0,
+    val services: List<ServiceTypeDto> = emptyList(),
+    val parts: List<WorkshopPartDto> = emptyList(),
+    val hours: WorkshopHoursDto? = null,
+    val bays: Int = 0,
+)
+
+@Serializable
+data class WorkshopPartDto(
+    val id: String,
+    val name: String,
+    val brand: String? = null,
+    val price: Double = 0.0,
+)
+
+@Serializable
+data class WorkshopHoursDto(
+    val open: String = "09:00",
+    val close: String = "18:00",
+)
+
+@Serializable
+data class SlotsResponse(
+    val items: List<SlotDto> = emptyList(),
+)
+
+@Serializable
+data class SlotDto(
+    val id: String,
+    val startAtMs: Long,
+    val endAtMs: Long,
+    val bay: Int = 1,
+)
+
+@Serializable
+data class CreateBookingRequest(
+    val workshopId: String,
+    val vehicleId: String,
+    val slotId: String,
+    val serviceIds: List<String> = emptyList(),
+    val historyShareToken: String? = null,
+)
+
+@Serializable
+data class BookingDto(
+    val id: String,
+    val workshopId: String,
+    val vehicleId: String,
+    val slotId: String,
+    val serviceIds: List<String> = emptyList(),
+    val historyShareToken: String? = null,
+    val status: String = "confirmed",
+    val createdAtMs: Long = 0,
+    val workshopName: String? = null,
+    val startAtMs: Long? = null,
+    val endAtMs: Long? = null,
+    val statusLabel: String? = null,
+    val holdTtlMs: Long? = null,
+)
+
+@Serializable
+data class BookingsListResponse(
+    val items: List<BookingDto> = emptyList(),
+)
+
+@Serializable
+data class NotificationsResponse(
+    val items: List<NotifDto> = emptyList(),
+)
+
+@Serializable
+data class NotifDto(
+    val id: String,
+    val type: String = "",
+    val title: String = "",
+    val body: String = "",
+    val atMs: Long = 0,
+    val read: Boolean = false,
+)
+
 interface MeruApi {
     @GET("health")
     suspend fun health(): HealthResponse
@@ -598,6 +698,42 @@ interface MeruApi {
 
     @GET("v1/billing/entitlement")
     suspend fun entitlement(@Header("Authorization") authorization: String): EntitlementResponse
+
+    @GET("v1/workshops")
+    suspend fun workshops(
+        @retrofit2.http.Query("make") make: String? = null,
+        @retrofit2.http.Query("lat") lat: Double? = null,
+        @retrofit2.http.Query("lon") lon: Double? = null,
+        @retrofit2.http.Query("q") q: String? = null,
+        @retrofit2.http.Query("verifiedOnly") verifiedOnly: String? = "true",
+    ): WorkshopsListResponse
+
+    @GET("v1/workshops/{id}")
+    suspend fun workshop(@retrofit2.http.Path("id") id: String): WorkshopDto
+
+    @GET("v1/workshops/{id}/slots")
+    suspend fun workshopSlots(
+        @retrofit2.http.Path("id") id: String,
+        @retrofit2.http.Query("fromMs") fromMs: Long? = null,
+    ): SlotsResponse
+
+    @POST("v1/bookings")
+    suspend fun createBooking(
+        @Header("Authorization") authorization: String,
+        @Body body: CreateBookingRequest,
+    ): BookingDto
+
+    @GET("v1/bookings")
+    suspend fun bookings(@Header("Authorization") authorization: String): BookingsListResponse
+
+    @POST("v1/bookings/{id}/cancel")
+    suspend fun cancelBooking(
+        @Header("Authorization") authorization: String,
+        @retrofit2.http.Path("id") id: String,
+    ): BookingDto
+
+    @GET("v1/notifications")
+    suspend fun notifications(@Header("Authorization") authorization: String): NotificationsResponse
 }
 
 @Module

@@ -100,16 +100,18 @@ Worker `trip.process`:
 ## B.7 Workshops & bookings
 | Method | Path | Notes |
 |--------|------|-------|
-| POST | `/workshops` | create + KYC pending |
+| GET | `/workshops` | **Phase 8:** `make/lat/lon/q/verifiedOnly` — rank brandFit→distance→rating |
+| GET | `/workshops/{id}` | public + services/parts/hours |
+| GET | `/workshops/{id}/slots` | available only (hold map filtered) |
+| POST | `/bookings` | **Phase 8:** NX hold then confirm; attach/create history share |
+| GET | `/bookings` | my bookings |
+| POST | `/bookings/{id}/cancel` | frees slot |
+| GET | `/notifications` | booking confirmed/reminder stubs |
+| POST | `/workshops` | create + KYC pending (Phase 9 staff) |
 | PATCH | `/workshops/{id}` | owner |
-| GET | `/workshops` | search filters |
-| GET | `/workshops/{id}` | public |
-| CRUD | `/workshop-staff/services` | |
-| CRUD | `/workshop-staff/parts` | |
-| PUT | `/workshop-staff/hours` | |
-| GET | `/workshops/{id}/slots` | available only |
-| POST | `/bookings` | hold slot Redis lock |
-| POST | `/bookings/{id}/cancel` | policy |
+| CRUD | `/workshop-staff/services` | Phase 9 |
+| CRUD | `/workshop-staff/parts` | Phase 9 |
+| PUT | `/workshop-staff/hours` | Phase 9 |
 | POST | `/jobs/{id}/check-in` | staff |
 | GET | `/jobs/{id}/shared-history` | staff + valid share |
 | POST | `/jobs/{id}/extras` | staff |
@@ -120,9 +122,9 @@ Worker `trip.process`:
 | POST | `/reviews` | completed jobs only |
 
 ### Slot concurrency
-- `SET booking_hold:{slotId} NX EX 120`  
-- Confirm within hold or release  
-- DB unique constraint prevents double book  
+- **Phase 8:** in-memory hold map `slotId → {userId, expiresAtMs}` TTL 120s (Redis `SET NX EX 120` upgrade path)  
+- Confirm within hold or release on expiry  
+- DB unique constraint prevents double book (Postgres — Phase 9+)  
 
 ### Invoice confirm writeback
 Creates `service_records` source=`mechanic_issued_bill`, lines/parts, links `invoice_id`, sets `certified=true`.

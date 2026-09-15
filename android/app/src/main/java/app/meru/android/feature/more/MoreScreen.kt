@@ -104,6 +104,8 @@ fun MoreScreen(
     onOpenChallenges: () -> Unit = {},
     onOpenLeaderboards: () -> Unit = {},
     onOpenAdventureMap: () -> Unit = {},
+    onOpenWorkshops: () -> Unit = {},
+    onOpenBookings: () -> Unit = {},
     driving: Boolean = false,
     viewModel: MoreViewModel = hiltViewModel(),
 ) {
@@ -124,9 +126,19 @@ fun MoreScreen(
         Text("Cockpit settings for Meru.", color = MeruMuted)
         if (driving) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Driving Mode — Arena locked", color = MeruAmber, fontSize = 13.sp)
+            Text("Driving Mode — Arena & Bay locked", color = MeruAmber, fontSize = 13.sp)
         }
         Spacer(modifier = Modifier.height(24.dp))
+        MeruSecondaryButton(
+            text = if (driving) "Bay (locked)" else "Bay — find workshops",
+            onClick = { if (!driving) onOpenWorkshops() },
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        MeruSecondaryButton(
+            text = if (driving) "Bookings (locked)" else "My bookings",
+            onClick = { if (!driving) onOpenBookings() },
+        )
+        Spacer(modifier = Modifier.height(12.dp))
         MeruSecondaryButton(
             text = if (driving) "Arena (locked)" else "Arena boards",
             onClick = { if (!driving) onOpenLeaderboards() },

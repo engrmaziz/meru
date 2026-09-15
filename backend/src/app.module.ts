@@ -8,6 +8,7 @@ import { ProgressionController } from './progression.controller';
 import { ProgressionService } from './progression.service';
 import { TripsController, TripsService } from './trips.controller';
 import { VaultController, VaultService } from './vault.controller';
+import { WorkshopsController, WorkshopsService } from './workshops.controller';
 
 @Module({
   imports: [],
@@ -18,6 +19,7 @@ import { VaultController, VaultService } from './vault.controller';
     ProgressionController,
     ArenaController,
     VaultController,
+    WorkshopsController,
   ],
   providers: [
     AuthService,
@@ -25,6 +27,7 @@ import { VaultController, VaultService } from './vault.controller';
     ProgressionService,
     ArenaService,
     VaultService,
+    WorkshopsService,
   ],
 })
 export class AppModule {}

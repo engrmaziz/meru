@@ -19,7 +19,8 @@ Android-first driving adventure — telemetry, ascent ranks, vehicle vault, work
 | 5 | Engine of Want | Done — server XP/scores, achievements, challenges, Home hub |
 | 6 | Arena | Done — seasonal boards, friends, adventure map, privacy |
 | 7 | Vault | Done — garage, timeline, entitlement, offline services |
-| 8–10 | … | Planned — see `plan/` |
+| 8 | Bay | Done — workshop discovery, holds, bookings + history share |
+| 9–10 | … | Planned — see `plan/` |
 
 ---
 
@@ -77,6 +78,13 @@ Android-first driving adventure — telemetry, ascent ranks, vehicle vault, work
 - Manual service offline → WorkManager sync; document signed-URL stub + confirm
 - Costs summary; history-share token for Phase 8; Play verify unlocks extra slots
 - Active vehicle linked on Start Drive
+
+## Phase 8 — Bay
+
+- Workshop discovery ranked by brand fit → distance → rating (Lahore seed)
+- Profile + MapLibre pin; services/slots; booking hold (in-memory NX EX 120)
+- History share attached on confirm; My Bookings + cancel; Driving Mode locks Bay
+- Notifications stub (confirmed + reminder)
 
 ---
 

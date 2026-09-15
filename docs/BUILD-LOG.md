@@ -109,6 +109,20 @@
 - **Strix:** skipped
 - **Follow-ups:** Phase 7 Vault (garage)
 
+### 2026-09-15 — Phase 8 Bay discovery & booking
+- **Band / slice:** Phase 8 / Bay
+- **Agent:** Cursor agent (commits as engrmaziz only)
+- **Ponytail rung used:** YAGNI (in-memory workshops + holds) + reuse (Vault history share + MapLibre)
+- **Context7 libs:** n/a
+- **Stitch screens:** Compose Bay / Workshop detail / Bookings hand-built (Stitch MCP unavailable)
+- **DEC referenced:** DEC-019, DEC-023, DEC-024
+- **What shipped:** Lahore workshop seed; brand-fit list; slots; NX-style hold + confirm booking; history share attach; Android Bay UI + MapLibre pin; My Bookings; Driving Mode lock; booking confirmed scale-in
+- **What deferred (ponytail:):** Redis holds; Postgres bookings; staff web; invoices/payments; push reminders
+- **Gamify/motion added:** Booking confirmed scale celebration
+- **Tests:** WorkshopsService brand-fit rank + double-book + hold expiry
+- **Strix:** skipped
+- **Follow-ups:** Phase 9 Invoice → vault writeback
+
 ### 2026-09-15 — Phase 7 Vault garage & timeline
 - **Band / slice:** Phase 7 / Vault
 - **Agent:** Cursor agent (commits as engrmaziz only)

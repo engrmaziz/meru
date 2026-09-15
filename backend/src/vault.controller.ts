@@ -457,6 +457,18 @@ export class VaultService {
     };
   }
 
+  assertShareValid(token: string, vehicleId: string) {
+    const share = this.shares.get(token);
+    if (!share) throw new BadRequestException('Invalid history share token');
+    if (share.vehicleId !== vehicleId) {
+      throw new BadRequestException('Share token does not match vehicle');
+    }
+    if (share.expiresAtMs < Date.now()) {
+      throw new BadRequestException('History share expired');
+    }
+    return share;
+  }
+
   private requireOwned(userId: string, vehicleId: string): Vehicle {
     const v = this.vehicles.get(vehicleId);
     if (!v) throw new NotFoundException('Vehicle not found');

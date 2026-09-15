@@ -79,4 +79,43 @@ describe('Meru API (e2e)', () => {
     expect(scores.body.xpTotal).toBe(first.body.awards.xpAwarded);
     expect(scores.body.weightsVersion).toBe(1);
   });
+
+  it('/v1/workshops brand-fit + booking share', async () => {
+    const list = await request(app.getHttpServer())
+      .get('/v1/workshops')
+      .query({ make: 'Audi', lat: 31.52, lon: 74.35, verifiedOnly: 'true' })
+      .expect(200);
+    expect(list.body.items[0].brands).toContain('Audi');
+    expect(list.body.items[0].kind).toBe('specialist');
+
+    const auth = await request(app.getHttpServer())
+      .post('/v1/auth/register')
+      .send({ email: 'bay@meru.app', password: 'secret1', displayName: 'Bay' })
+      .expect(201);
+    const token = auth.body.accessToken as string;
+
+    const vehicle = await request(app.getHttpServer())
+      .post('/v1/vehicles')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ make: 'Audi', model: 'A4', year: 2019 })
+      .expect(201);
+
+    const slots = await request(app.getHttpServer())
+      .get(`/v1/workshops/${list.body.items[0].id}/slots`)
+      .expect(200);
+    expect(slots.body.items.length).toBeGreaterThan(0);
+
+    const booking = await request(app.getHttpServer())
+      .post('/v1/bookings')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        workshopId: list.body.items[0].id,
+        vehicleId: vehicle.body.id,
+        slotId: slots.body.items[0].id,
+        serviceIds: ['oil_change'],
+      })
+      .expect(201);
+    expect(booking.body.historyShareToken).toBeTruthy();
+    expect(booking.body.status).toBe('confirmed');
+  });
 });

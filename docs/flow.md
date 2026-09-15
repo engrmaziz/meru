@@ -113,18 +113,14 @@ Add 2nd car → Entitlement check
 
 ```
 Select vehicle
- → Discover workshops (brand fit → distance → rating)
- → Open profile (services/parts/hours)
- → Pick slot (Redis hold)
- → Booking + history share scope + symptoms
- → Workshop accept
- → Check-in → staff views shared history
- → Job in progress → optional extra-work approval
- → Invoice builder → Issue
- → Owner reviews → Confirm
+ → Discover workshops (brand fit → distance → rating)  [Phase 8 live]
+ → Open profile (services/parts/hours + MapLibre pin)
+ → Pick slot (in-memory NX hold TTL 120s; Redis upgrade DEC-024)
+ → Booking confirm + history share (auto or token)
+ → My Bookings + cancel; Driving Mode locks Bay UI
+ → Workshop accept / check-in / invoice  [Phase 9+]
  → Certified service_record writeback into vault timeline
  → Review
- → Maintenance schedule updates
 ```
 
 Workshop staff path (MVP = web portal):
