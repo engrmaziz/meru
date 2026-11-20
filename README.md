@@ -1,137 +1,38 @@
-# Meru
+# Kotlin Multiplatform app template
 
-Android-first driving adventure — telemetry, ascent ranks, vehicle vault, workshops.
+[![official project](http://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-**Tagline:** Every drive becomes an ascent.
+This is a basic Kotlin Multiplatform app template for Android, iOS, desktop, and web. It includes shared business logic and data handling, and a shared UI implementation using Compose Multiplatform.
 
-**Repo:** https://github.com/engrmaziz/meru
+> The template is also available [with native UI written in Jetpack Compose and SwiftUI](https://github.com/kotlin/KMP-App-Template-Native).
+>
+> The [`kotlin-toolchain` branch](https://github.com/Kotlin/KMP-App-Template/tree/kotlin-toolchain) showcases the same project configured with the [Kotlin Toolchain](https://github.com/JetBrains/kotlin-toolchain).
 
----
+![Screenshots of the app](images/screenshots.png)
 
-## Build status
+### Running the apps
 
-| Phase | Codename | Status |
-|------:|----------|--------|
-| 1 | Bedrock | Done — app shell, auth, Nest health |
-| 2 | Pulse | Done — GPS engine, Room trips, FG service |
-| 3 | Cockpit | Done — MapLibre, calibration, G-gauge, drive modes |
-| 4 | Afterglow | Done — summary, replay, WorkManager sync, trip ingest |
-| 5 | Engine of Want | Done — server XP/scores, achievements, challenges, Home hub |
-| 6 | Arena | Done — seasonal boards, friends, adventure map, privacy |
-| 7 | Vault | Done — garage, timeline, entitlement, offline services |
-| 8 | Bay | Done — workshop discovery, holds, bookings + history share |
-| 9 | Stamp | Done — jobs, invoices, certified vault writeback, staff web |
-| 10 | Summit | Done — soft-launch Lahore harden, flags, security e2e |
+Use the run configurations provided by the run widget in your IDE's toolbar (make sure that you have the [Kotlin Multiplatform plugin](https://plugins.jetbrains.com/plugin/14936-kotlin-multiplatform) installed.
 
----
+You can also use these commands and options:
 
-## Phase 1 — Bedrock
+- Android app: `./gradlew :androidApp:assembleDebug`
+- Desktop app: `./gradlew :desktopApp:hotRun --auto`
+- Web app: `./gradlew :webApp:wasmJsBrowserDevelopmentRun`
+- iOS app: open the iOS project in Xcode and run it from there.
 
-- Android Compose shell: Welcome → Auth → Home / Drive / Trips / Garage / More
-- NestJS `/health` + `/v1/auth/*` (in-memory)
-- Docker Compose: Postgres + Redis (for later)
-- Meru design tokens + Hilt / Room / DataStore / Retrofit
+### Technologies
 
-## Phase 2 — Pulse
+The data displayed by the app is from [The Metropolitan Museum of Art Collection API](https://metmuseum.github.io/).
 
-- Fused Location + foreground drive service
-- JumpFilter + TelemetryAccumulator → Room `trips` / `trip_locations`
-- DrivingMode locks More mid-drive
-- Trips list (local)
+The app uses the following multiplatform dependencies in its implementation:
 
-## Phase 3 — Cockpit
+- [Compose Multiplatform](https://jb.gg/compose) for UI
+- [Compose Navigation](https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-navigation-routing.html)
+- [Ktor](https://ktor.io/) for networking
+- [kotlinx.serialization](https://github.com/Kotlin/kotlinx.serialization) for JSON handling
+- [Coil](https://github.com/coil-kt/coil) for image loading
+- [Koin](https://github.com/InsertKoinIO/koin) for dependency injection
 
-- MapLibre live route + bearing
-- Phone calibration + MotionEngine G-gauge
-- Drive modes: Minimal / Detailed / Performance / HUD
-- Weak GPS / permission banners
-
-## Phase 4 — Afterglow
-
-- Local `TripProcessor`: events, elevation, provisional quality, geohash exploration XP
-- Screens: Processing → Summary (score count-up) → Detail (timeline, speed/elev graphs, map replay)
-- Home stats from completed trips
-- WorkManager `TripSyncWorker` → idempotent `POST /v1/trips`
-- NestJS in-memory trip store (dedupe by `userId:clientTripId`)
-
-## Phase 5 — Engine of Want
-
-- Server scoring: Quality / Exploration / Activity → Adventure Score + Driver Rating
-- Versioned `GET /v1/scores/config` weights (not in APK)
-- XP ledger, levels, titles; achievements + daily/weekly challenges on trip finalize
-- Spoofed client `qualityScore` / `explorationXp` ignored for competitive awards
-- Home game hub (XP bar motion, streak, next challenge); Summary provisional → server final
-- More: post-drive notification opt-ins (level / challenge / streak)
-
-## Phase 6 — Arena
-
-- Geo seed: Lahore → Punjab → Pakistan → Global; Ascent Season 1
-- Precomputed boards + reindex on trip finalize; friends board + follow
-- Home season rank chips; Arena UI (tabs, podium, YOU sticky, delta ▲▼)
-- Adventure map city % + geohash glow; privacy-safe share card
-- Leaderboard opt-out; Driving Mode hard-blocks boards/map
-- Ghost quality compare on repeat route; thin `GET/PATCH /v1/admin/flags`
-
-## Phase 7 — Vault
-
-- Garage list + 3-step add-vehicle wizard; one free car (DEC)
-- One-tap timeline (ownership / docs / services / drives merged)
-- Manual service offline → WorkManager sync; document signed-URL stub + confirm
-- Costs summary; history-share token for Phase 8; Play verify unlocks extra slots
-- Active vehicle linked on Start Drive
-
-## Phase 8 — Bay
-
-- Workshop discovery ranked by brand fit → distance → rating (Lahore seed)
-- Profile + MapLibre pin; services/slots; booking hold (in-memory NX EX 120)
-- History share attached on confirm; My Bookings + cancel; Driving Mode locks Bay
-- Notifications stub (confirmed + reminder)
-
-## Phase 9 — Stamp
-
-- Job lifecycle from booking; staff check-in + shared history (share-gated)
-- Extra-work approve/deny; invoice issue (PDF stub) → owner confirm → certified vault writeback
-- Dispute blocks writeback; reviews only on closed jobs
-- Android Stamp screens + CERTIFIED timeline stamp; `workshop-web` Next.js staff MVP
-
-## Phase 10 — Summit
-
-- Launch flags (S2/S3/S4) + Lahore soft launch; admin key; metrics; rate limits
-- Stricter trip integrity; account deletion; Android remote flags
-- Security e2e (IDOR / admin / delete); `docs/SOFT-LAUNCH.md` + `docs/SUPPORT.md`
-
----
-
-## Run backend
-
-```bash
-cd backend
-npm install
-npm run start:dev
-# GET http://localhost:3000/health
-# POST http://localhost:3000/v1/trips  (Bearer meru_<userId>_…)
-# GET  http://localhost:3000/v1/leaderboards/city/pk-pb-lhr
-```
-
-## Run Android
-
-Open `android/` in Android Studio (SDK required). Emulator API base URL is `http://10.0.2.2:3000/`.
-
-## Run workshop staff web
-
-```bash
-cd workshop-web
-npm install
-npm run dev
-# http://localhost:3001 — paste Bearer token + X-Workshop-Id (e.g. ws-audi-lhr)
-```
-
-## Docs & plan
-
-- `plan/` — 10 sequential phases
-- `docs/` — agent bible, decisions, flow, BUILD-LOG
-- `AGENTS.md` — agent entrypoint
-
-## Author
-
-Commits: **engrmaziz** only (`Musharraf Aziz` / `io@maziz.me`). No Cursor co-author trailers.
+> These are just some of the possible libraries to use for these tasks with Kotlin Multiplatform, and their usage here isn't a strong recommendation for these specific libraries over the available alternatives. You can find a wide variety of curated multiplatform libraries in the [kmp-awesome](https://github.com/terrakok/kmp-awesome) repository.

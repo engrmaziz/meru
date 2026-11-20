@@ -1,26 +1,19 @@
-# Local / secrets
-.cursor/mcp.json
-.env
-.env.*
-!.env.example
-**/google-services.json
-**/local.properties
-*.jks
-*.keystore
-
-# Android / Node common
+*.iml
+.kotlin
+.gradle
 **/build/
-**/.gradle/
-**/node_modules/
-**/dist/
-android/.idea/
-android/*.iml
-android/captures/
-android/.cxx/
-
-# Strix / scans
-strix_runs/
-
-# OS
+xcuserdata
+!src/**/build/
+local.properties
+.idea
 .DS_Store
-Thumbs.db
+captures
+.externalNativeBuild
+.cxx
+node_modules/
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
+**/xcshareddata/WorkspaceSettings.xcsettings
